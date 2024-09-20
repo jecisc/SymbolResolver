@@ -15,11 +15,11 @@ To install SymbolResolver on your Pharo image, execute the following script:
 ```Smalltalk
 Metacello new
 	githubUser: 'jecisc' project: 'SymbolResolver' commitish: 'main' path: 'src';
-	baseline: 'TinyLogger';
+	baseline: 'SymbolResolver';
 	load
 ```
 
-To add TinyLogger to your baseline:
+To add SymbolResolver to your baseline:
 
 ```Smalltalk
 spec
