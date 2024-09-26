@@ -68,16 +68,16 @@ SRParsingReport >> catch: exceptionOrExceptionSet during: aBlock isWarningIf: is
 	"Catches the exception provided as argument or any exception of exception set (if it is an exception set) during th execution of aBlock.
 	 If the isWarningConditionBlock evaluates to true with the exception caught, adds it to warning and resume it. Else adds it to errors and stop execution."
 
-	aBlock
-		on: exceptionOrExceptionSet
-		do: [ :exception |
-			(isWarningConditionBlock value: exception)
-				ifTrue: [
-					self addWarning: exception.
-					exception resume ]
-				ifFalse: [
-					self class isInDebugMode ifTrue: [ exception pass ].
-					self addError: exception ] ]
+	^ aBlock
+		  on: exceptionOrExceptionSet
+		  do: [ :exception |
+			  (isWarningConditionBlock value: exception)
+				  ifTrue: [
+					  self addWarning: exception.
+					  exception resume ]
+				  ifFalse: [
+					  self class isInDebugMode ifTrue: [ exception pass ].
+					  self addError: exception ] ]
 ]
 
 { #category : 'catching' }
