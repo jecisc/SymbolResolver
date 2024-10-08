@@ -131,3 +131,11 @@ SRTSolverUserVisitor >> useMainEntity: anEntity during: aBlockClosure [
 SRTSolverUserVisitor >> version [
 	self explicitRequirement
 ]
+
+{ #category : 'accessing' }
+SRTSolverUserVisitor >> withCurrentEntityDo: aBlock [
+
+	self solver scopeIsEmpty ifTrue: [ ^ self ].
+
+	aBlock value: self currentEntity
+]
