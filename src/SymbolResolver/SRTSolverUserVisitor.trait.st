@@ -44,13 +44,8 @@ SRTSolverUserVisitor >> errorReport: anObject [
 ]
 
 { #category : 'initialization' }
-SRTSolverUserVisitor >> initialiseFutureSolver [
-	solver := SRFutureReferencesSolver new
-]
-
-{ #category : 'initialization' }
 SRTSolverUserVisitor >> initialiseSolver [
-	solver := SRReferencesSolver new
+	solver := SRSymbolsSolver new
 ]
 
 { #category : 'scope' }

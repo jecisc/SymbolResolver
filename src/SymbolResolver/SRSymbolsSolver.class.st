@@ -1,10 +1,13 @@
 "
-I am a class that can solve referencies and is able to give you the current entity for your visit
+I am a class used to do symbol resolution for a parser. I'll store the scopes of the parsing and my users can ask me to resolve symbols (accesses, imports, references...) after the first pass of a parsing.
+
+In order to do that I'll save a collection of `SRResolvable` with a copy of the scopes stack to be able to resolve them.
 "
 Class {
-	#name : 'SRReferencesSolver',
+	#name : 'SRSymbolsSolver',
 	#superclass : 'Object',
 	#instVars : [
+		'toResolve',
 		'scopes'
 	],
 	#category : 'SymbolResolver-Solver',
@@ -13,55 +16,55 @@ Class {
 }
 
 { #category : 'scopes management' }
-SRReferencesSolver >> copyScopes [
+SRSymbolsSolver >> copyScopes [
 	^ scopes := scopes copy
 ]
 
 { #category : 'manager' }
-SRReferencesSolver >> createScopeManager [
+SRSymbolsSolver >> createScopeManager [
 	^ SRScopeManager newAssociatedToSolver: self
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> currentEntity [
+SRSymbolsSolver >> currentEntity [
 	^ (self scopes
 		detect: #hasCurrentEntity
 		ifNone: [ SRNoCurrentEntityAvailable signalReferencesResolver: self ]) currentEntity
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> currentEntityOfType: anEntityType [
+SRSymbolsSolver >> currentEntityOfType: anEntityType [
 	^ (self scopes
 		detect: [:aScope | aScope hasCurrentEntity and: [aScope currentEntity class = anEntityType]]
 		ifNone: [ SRNoCurrentEntityOfSpecificTypeAvailable signalForType: anEntityType ReferencesResolver:  self ]) currentEntity
 ]
 
 { #category : 'alias' }
-SRReferencesSolver >> defineAliasInCurrentScope: aString for: aBlockClosure [
+SRSymbolsSolver >> defineAliasInCurrentScope: aString for: aBlockClosure [
 	self topScope addAlias: aString forEntity: aBlockClosure value
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> detect: aBlock [
+SRSymbolsSolver >> detect: aBlock [
 	"Detects the scope for which aBlock evaluates to true."
 	^ self scopes detect: aBlock
 ]
 
 { #category : 'initialization' }
-SRReferencesSolver >> initialize [
+SRSymbolsSolver >> initialize [ 
 	super initialize.
-	self scopes: Stack new
+	self toResolve: OrderedCollection new
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> mainEntity [
+SRSymbolsSolver >> mainEntity [
 	^ (self scopes
 		detect: #isMainEntity 
 		ifNone: [ SRNoMainEntityAvailable signalReferencesResolver: self ]) currentEntity
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> peekScopeAtIndex: anInteger [
+SRSymbolsSolver >> peekScopeAtIndex: anInteger [
 	"DISCLAIMER:
 	 Returns the scope at index anInteger (index 1 is the top of the stack).
 	 This method is really specific and should usually NOT BE USED.
@@ -71,22 +74,22 @@ SRReferencesSolver >> peekScopeAtIndex: anInteger [
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> popScope [
+SRSymbolsSolver >> popScope [
 	^ self copyScopes pop
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushEntitiesAsScope: aCollectionOfEntities [
+SRSymbolsSolver >> pushEntitiesAsScope: aCollectionOfEntities [
 	self pushScope: (SRCollectionScope reachableEntities: aCollectionOfEntities)
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushEntityAsScope: anEntity [
+SRSymbolsSolver >> pushEntityAsScope: anEntity [
 	self pushScope: (SREntityScope entity: anEntity)
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushResolvableAsScopeBeforeCurrentScope: aResolvable foundAction: aBlockClosure [
+SRSymbolsSolver >> pushResolvableAsScopeBeforeCurrentScope: aResolvable foundAction: aBlockClosure [
 	self assert: aResolvable isResolvable description: 'Only SRResolvable can be provided as scope this way'.
 	"we push the resolvable in the stuff to resolve"
 	self resolve: aResolvable foundAction: aBlockClosure.
@@ -96,7 +99,7 @@ SRReferencesSolver >> pushResolvableAsScopeBeforeCurrentScope: aResolvable found
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushResolvableAsScopeBeforeMainEntityScope: aResolvable foundAction: aBlockClosure [
+SRSymbolsSolver >> pushResolvableAsScopeBeforeMainEntityScope: aResolvable foundAction: aBlockClosure [
 	self assert: aResolvable isResolvable description: 'Only SRResolvable can be provided as scope this way'.
 	"we push the resolvable in the stuff to resolve"
 	self resolve: aResolvable foundAction: aBlockClosure.
@@ -106,13 +109,13 @@ SRReferencesSolver >> pushResolvableAsScopeBeforeMainEntityScope: aResolvable fo
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushScope: aScope [
+SRSymbolsSolver >> pushScope: aScope [
 	"we do a copy to avoid changing previous scope that need to be resolved later"
 	^ self copyScopes push: aScope
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushScopeBeforeCurrentScope: aScope [
+SRSymbolsSolver >> pushScopeBeforeCurrentScope: aScope [
 	| topScope |
 	topScope := self popScope.
 	self scopes
@@ -122,7 +125,7 @@ SRReferencesSolver >> pushScopeBeforeCurrentScope: aScope [
 ]
 
 { #category : 'scopes management' }
-SRReferencesSolver >> pushScopeBeforeMainEntityScope: aScope [
+SRSymbolsSolver >> pushScopeBeforeMainEntityScope: aScope [
 	| scopeStack |
 	scopeStack := Stack new.
 	[[ (scopeStack push: self popScope) isMainEntity ] whileFalse] on: CollectionIsEmpty do: [SRNoMainEntityAvailable signalReferencesResolver: self "Careful, the stack has been modified, everything is in the scope stack local variable"].
@@ -135,7 +138,7 @@ SRReferencesSolver >> pushScopeBeforeMainEntityScope: aScope [
 ]
 
 { #category : 'detect' }
-SRReferencesSolver >> reachableEntitiesFor: aScope detect: aBlockClosure ifFound: aBlockClosureAction [
+SRSymbolsSolver >> reachableEntitiesFor: aScope detect: aBlockClosure ifFound: aBlockClosureAction [
 	"optimisation to avoid recreate collection"
 
 	aScope reachableEntities
@@ -146,42 +149,69 @@ SRReferencesSolver >> reachableEntitiesFor: aScope detect: aBlockClosure ifFound
 ]
 
 { #category : 'removing' }
-SRReferencesSolver >> removeScope: aPSQLScope [
+SRSymbolsSolver >> removeScope: aPSQLScope [
 	self copyScopes remove: aPSQLScope
 ]
 
-{ #category : 'solving' }
-SRReferencesSolver >> resolve: aSRIdentifierWithNode foundAction: aBlockClosure [ 
-	self shouldBeImplemented.
+{ #category : 'accessing' }
+SRSymbolsSolver >> resolve: aResolvable foundAction: aBlockClosure [
+	^ self toResolve
+		addLast:
+			(SRResolvableWithContext
+				newFromScopes: self scopes
+				identifiers: aResolvable
+				foundAction: aBlockClosure)
 ]
 
 { #category : 'resolution' }
-SRReferencesSolver >> resolve: aResolvable inScope: aScope [
+SRSymbolsSolver >> resolve: aResolvable inScope: aScope [
 	^ aResolvable resolveInScope: aScope currentEntity: self currentEntity 
 ]
 
+{ #category : 'accessing' }
+SRSymbolsSolver >> resolveImmediately: aResolvable [
+	^ super resolve: aResolvable 
+]
+
+{ #category : 'resolution' }
+SRSymbolsSolver >> resolveUnresolvedReferences [
+	self toResolve
+		do: #resolve
+		displayingProgress: 'References resolution'
+]
+
 { #category : 'testing' }
-SRReferencesSolver >> scopeIsEmpty [
+SRSymbolsSolver >> scopeIsEmpty [
 
 	^ self scopes allSatisfy: [ :scope | scope hasCurrentEntity not ]
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> scopes [
+SRSymbolsSolver >> scopes [
 	^ scopes
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> scopes: anObject [
+SRSymbolsSolver >> scopes: anObject [
 	scopes := anObject
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> topScope [
+SRSymbolsSolver >> toResolve [
+	^ toResolve
+]
+
+{ #category : 'accessing' }
+SRSymbolsSolver >> toResolve: anObject [
+	toResolve := anObject
+]
+
+{ #category : 'accessing' }
+SRSymbolsSolver >> topScope [
 	^ self scopes top
 ]
 
 { #category : 'accessing' }
-SRReferencesSolver >> topScopeReachableEntities [
+SRSymbolsSolver >> topScopeReachableEntities [
 	^ self topScope reachableEntities
 ]

@@ -1,5 +1,5 @@
 Class {
-	#name : 'SRReferencesSolverTest',
+	#name : 'SRSymbolsSolverTest',
 	#superclass : 'TestCase',
 	#instVars : [
 		'referencesSolver'
@@ -9,13 +9,13 @@ Class {
 }
 
 { #category : 'running' }
-SRReferencesSolverTest >> setUp [
+SRSymbolsSolverTest >> setUp [
 	super setUp.
-	referencesSolver := SRFutureReferencesSolver new
+	referencesSolver := SRSymbolsSolver new
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testCreateScopeManager [
+SRSymbolsSolverTest >> testCreateScopeManager [
 	| scopeManager |
 	scopeManager := referencesSolver createScopeManager.
 	
@@ -24,7 +24,7 @@ SRReferencesSolverTest >> testCreateScopeManager [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testCurrentEntity [
+SRSymbolsSolverTest >> testCurrentEntity [
 	| currentEntity currentEntity2 |
 	self should: [ referencesSolver currentEntity ] raise: SRNoCurrentEntityAvailable.
 	
@@ -47,14 +47,14 @@ SRReferencesSolverTest >> testCurrentEntity [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testDefineAliasInCurrentScopeFor [
+SRSymbolsSolverTest >> testDefineAliasInCurrentScopeFor [
 	self flag: #todo. "Add test."
 	self skip.
 	self fail
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testEnsureScopesAreCopied [
+SRSymbolsSolverTest >> testEnsureScopesAreCopied [
 	| firstScope scopesFirstState secondScope scopesSecondState |
 	firstScope := SREntityScope new.
 	secondScope := SREntityScope new.
@@ -69,7 +69,7 @@ SRReferencesSolverTest >> testEnsureScopesAreCopied [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testPopScope [
+SRSymbolsSolverTest >> testPopScope [
 	| sizeBefore scope |
 	sizeBefore := referencesSolver scopes size.
 	scope := SRScope new.
@@ -81,7 +81,7 @@ SRReferencesSolverTest >> testPopScope [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testPushEntitiesAsScope [
+SRSymbolsSolverTest >> testPushEntitiesAsScope [
 	| entities |
 	entities := { Object new. Object new. Object new }.
 	
@@ -92,7 +92,7 @@ SRReferencesSolverTest >> testPushEntitiesAsScope [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testPushEntityAsScope [
+SRSymbolsSolverTest >> testPushEntityAsScope [
 	| entity |
 	entity := Object new.
 	
@@ -103,7 +103,7 @@ SRReferencesSolverTest >> testPushEntityAsScope [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testPushEntityBlockAsScope [
+SRSymbolsSolverTest >> testPushEntityBlockAsScope [
 	| entity computer isFoundActionTriggered |
 	isFoundActionTriggered := false.
 	entity := Mock named: #Cyril.
@@ -122,7 +122,7 @@ SRReferencesSolverTest >> testPushEntityBlockAsScope [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testPushScope [
+SRSymbolsSolverTest >> testPushScope [
 	| scope |
 	scope := SRScope new.
 	referencesSolver pushScope: scope.
@@ -131,7 +131,7 @@ SRReferencesSolverTest >> testPushScope [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testRemoveScope [
+SRSymbolsSolverTest >> testRemoveScope [
 	| scopesCount scope1 scope2 scope3 |
 	scopesCount := referencesSolver scopes size.
 	scope1 := SRScope new.
@@ -154,7 +154,7 @@ SRReferencesSolverTest >> testRemoveScope [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testResolve [
+SRSymbolsSolverTest >> testResolve [
 	| cyril guillaume isFoundActionTriggered |
 	isFoundActionTriggered := false.
 	cyril := Mock named: #Cyril.
@@ -173,14 +173,14 @@ SRReferencesSolverTest >> testResolve [
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testResolveInScope [
+SRSymbolsSolverTest >> testResolveInScope [
 	self flag: #todo. "Add test."
 	self skip.
 	self fail
 ]
 
 { #category : 'tests' }
-SRReferencesSolverTest >> testTopScopeReachableEntities [
+SRSymbolsSolverTest >> testTopScopeReachableEntities [
 	self flag: #todo. "Add test."
 	self skip.
 	self fail
