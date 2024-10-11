@@ -102,10 +102,12 @@ SRResolvableWithContext >> tryToApplyReplacementStrategy [
 
 { #category : 'resolution' }
 SRResolvableWithContext >> tryToResolveInScopes [
-	self scopes
-		do: [ :aScope | 
-			[ ^ self resolve: self resolvable inScope: aScope ]
-				on: NotFound
-				do: [ "do nothing to try superior scope" ] ].
 
+	[
+	self scopes do: [ :aScope |
+		[ ^ self resolve: self resolvable inScope: aScope ]
+			on: NotFound
+			do: [ "do nothing to try superior scope" ] ] ]
+		on: SRNoResolutionPossible
+		do: [ "Do nothing and do not check the superior scopes because we know that the symbol cannot be resolved" ]
 ]
