@@ -87,9 +87,8 @@ SRTSolverUserVisitor >> resolve: identifiers onNotFoundDo: aBlock [
 
 { #category : 'resolution' }
 SRTSolverUserVisitor >> resolveSilently: identifiers [
-	self errorReport
-		catch: SRReferencesInconsistencies , SRReferencesNotFound
-		during: [ self resolve: identifiers ]
+
+	self errorReport catch: SRReferencesNotFound during: [ self resolve: identifiers ]
 ]
 
 { #category : 'accessing' }
