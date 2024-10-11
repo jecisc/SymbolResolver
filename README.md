@@ -31,7 +31,8 @@ Note you can replace the #main by another branch such as #development or a tag s
 
 ## Documentation
 
-TODO
+* [User documentation](resources/docs/UserDocumentation.md)
+* [Developer documentation](resources/docs/DeveloperDocumentation.md)
 
 ## Version management 
 
