@@ -19,7 +19,7 @@ SRResolvableEntityScope class >> resolvable: aSRResolvable [
 		yourself
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'accessing' }
 SRResolvableEntityScope >> entity [
 	self assert:  self resolvable entity notNil description: 'We should always have resolved it before needing it'.
 	^ self resolvable entity

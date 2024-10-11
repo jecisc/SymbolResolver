@@ -4,8 +4,7 @@ I am a trait for visitors that are using a solver
 Trait {
 	#name : 'SRTSolverUserVisitor',
 	#instVars : [
-		'solver',
-		'errorReport'
+		'solver'
 	],
 	#category : 'SymbolResolver-Core',
 	#package : 'SymbolResolver',
@@ -34,13 +33,8 @@ SRTSolverUserVisitor >> defineAliasInCurrentScope: anAlias for: aBlockClosure [
 
 { #category : 'accessing' }
 SRTSolverUserVisitor >> errorReport [
-	errorReport ifNil: [ errorReport := SRParsingReport new ].
-	^ errorReport
-]
 
-{ #category : 'accessing' }
-SRTSolverUserVisitor >> errorReport: anObject [
-	errorReport := anObject
+	^ self solver errorReport
 ]
 
 { #category : 'initialization' }
@@ -84,6 +78,12 @@ SRTSolverUserVisitor >> resolve: identifiers onNotFoundDo: aBlock [
 SRTSolverUserVisitor >> resolveSilently: identifiers [
 
 	self errorReport catch: SRReferencesNotFound during: [ self resolve: identifiers ]
+]
+
+{ #category : 'resolution' }
+SRTSolverUserVisitor >> resolveUnresolvedSymbols [
+
+	^ self solver resolveUnresolvedSymbols
 ]
 
 { #category : 'accessing' }

@@ -8,7 +8,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'toResolve',
-		'scopes'
+		'scopes',
+		'errorReport'
 	],
 	#category : 'SymbolResolver-Solver',
 	#package : 'SymbolResolver',
@@ -50,9 +51,17 @@ SRSymbolsSolver >> detect: aBlock [
 	^ self scopes detect: aBlock
 ]
 
+{ #category : 'accessing' }
+SRSymbolsSolver >> errorReport [
+
+	^ errorReport ifNil: [ errorReport := SRParsingReport new ]
+]
+
 { #category : 'initialization' }
-SRSymbolsSolver >> initialize [ 
+SRSymbolsSolver >> initialize [
+
 	super initialize.
+	self scopes: Stack new.
 	self toResolve: OrderedCollection new
 ]
 
@@ -168,16 +177,10 @@ SRSymbolsSolver >> resolve: aResolvable inScope: aScope [
 	^ aResolvable resolveInScope: aScope currentEntity: self currentEntity 
 ]
 
-{ #category : 'accessing' }
-SRSymbolsSolver >> resolveImmediately: aResolvable [
-	^ super resolve: aResolvable 
-]
-
 { #category : 'resolution' }
-SRSymbolsSolver >> resolveUnresolvedReferences [
-	self toResolve
-		do: #resolve
-		displayingProgress: 'References resolution'
+SRSymbolsSolver >> resolveUnresolvedSymbols [
+
+	self toResolve do: [ :resolvable | self errorReport catch: Error during: [ resolvable resolve ] ] displayingProgress: 'References resolution'
 ]
 
 { #category : 'testing' }

@@ -115,7 +115,7 @@ SRSymbolsSolverTest >> testPushEntityBlockAsScope [
 	self assert: referencesSolver scopes pop entity equals: entity.
 	self assert: referencesSolver scopes top class equals: SRResolvableEntityScope.
 	self deny: referencesSolver scopes top isResolved.
-	referencesSolver resolveUnresolvedReferences.
+	referencesSolver resolveUnresolvedSymbols.
 	self assert: referencesSolver scopes top entity equals: computer.
 	self assert: referencesSolver scopes top isResolved.
 	self assert: isFoundActionTriggered
@@ -168,7 +168,7 @@ SRSymbolsSolverTest >> testResolve [
 			isFoundActionTriggered := true ].
 	(cyril stub reachableEntitiesNamed: 'guillaume' ofKinds: {nil}) willReturn: {guillaume}.
 	guillaume stub name willReturn: 'guillaume'.
-	referencesSolver resolveUnresolvedReferences.
+	referencesSolver resolveUnresolvedSymbols.
 	self assert: isFoundActionTriggered
 ]
 
