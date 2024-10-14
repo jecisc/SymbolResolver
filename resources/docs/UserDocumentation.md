@@ -1,17 +1,36 @@
 # User Documentation of the Symbol Resolver
+
+A parsing helper to manage symbol resolution by handling scope resolution and finding the right entity from symbols in parsers
 <!-- TOC -->
 
 - [User Documentation of the Symbol Resolver](#user-documentation-of-the-symbol-resolver)
+  - [Getting started](#getting-started)
+  - [Manage your scopes](#manage-your-scopes)
   - [Solvers](#solvers)
     - [Existing solvers](#existing-solvers)
     - [Add you own solver](#add-you-own-solver)
   - [Error repport](#error-repport)
+  - [Aliases](#aliases)
 
 <!-- /TOC -->
 
+This documentation is still a WIP. I'll add parts when I get the time little by little
+
+## Getting started
+
+The main goal of the symbol resolver is to simplify the symbol resolution during the development of a parser. 
+
+A classic architecture for the development of a parser to build a model is to:
+- Define a grammar and a paser for this grammar 
+- Generate a pseudo AST matching the grammar and produce it via the parser
+- Visit a first time this AST to build all entities of the model
+- Visit a second time this AST to build all relations between entities of the model (We need a second pass because we need to ensure that all entities are created before we resolve links between them)
+
 TODO
 
-This documentation is still a WIP. I'll add parts when I get the time little by little
+## Manage your scopes
+
+TODO
 
 ## Solvers 
 
@@ -64,3 +83,7 @@ API:
 
 > [!TIP]
 > While developping a parser it might be interesting to have an actual debugger instead of catching all the errors. It is possible to go in development mode via the world menu: `Debug > Toggle Symbol Resolver Debug mode`
+
+## Aliases
+
+TODO
