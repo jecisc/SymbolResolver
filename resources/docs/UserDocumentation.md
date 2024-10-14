@@ -5,6 +5,7 @@
   - [Solvers](#solvers)
     - [Existing solvers](#existing-solvers)
     - [Add you own solver](#add-you-own-solver)
+  - [Error repport](#error-repport)
 
 <!-- /TOC -->
 
@@ -30,3 +31,36 @@ The actual resolution should be implemented in the method `MyResolvable>>#resolv
 The method will be called first in the top scope. In case the entity is not found, you should throw a `NotFound` error. In that case, the solver will catch this error and try in the next scope until there is no scope left to look into. If that's happening, then the replacement strategy will be triggered. 
 In some cases it is also possible that we know that an entity will not be found in any scope left to search. In that case, it is possible to raise a `SRNoResolutionPossible` error instead of a `NotFound`. This will stop the resolution right away and delegate the resolution to the replacement strategy. This is an optimization.
 
+## Error repport
+
+In the development of a parser it is common to have edge cases that are hard to handle and to have crashes. This project provides a little utility to help handling such cases.
+
+`SRParsingReport` is instanciated by the `SRSymbolsSolver` in the `errorReport` instance variable during its initialization. It can be used to add a safeguard during the execution of some code to catch errors or warnings without interruptiong the parsing.
+
+For example it can be used during the visit of an AST with a visitor using `SRTSolverUserVisitor` like this:
+
+```st
+acceptNode: aNode
+
+	^ self errorReport catch: Error during: [ super acceptNode: aNode ]
+```
+
+Or
+
+```st
+visit: aNode
+	
+	^ self errorReport catch: Error during: [ aNode acceptVisitor: self ]
+```
+
+This error report is also used during the symbol resolution directly in the method `SRSymbolsSolver>>#resolveUnresolvedSymbols`.
+
+At the end of the pasring, we can inspect this error report to find the errors that happened during the parsing.
+
+API:
+- `SRParsingReport>>#catch:during:` allow to catch some errors or error set during the execution of a block
+- `SRParsingReport>>#catch:during:isWarningIf:` same as above but wiht a way to configure what should be considered as a warning
+- `SRParsingReport>>#catchWarningsDuring:` allow to catch and proceed on warnings during the execution of a block, but still raises errors
+
+> [!TIP]
+> While developping a parser it might be interesting to have an actual debugger instead of catching all the errors. It is possible to go in development mode via the world menu: `Debug > Toggle Symbol Resolver Debug mode`
