@@ -6,6 +6,8 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 - [User Documentation of the Symbol Resolver](#user-documentation-of-the-symbol-resolver)
   - [Getting started](#getting-started)
   - [Manage your scopes](#manage-your-scopes)
+    - [Understanding the importance of scopes](#understanding-the-importance-of-scopes)
+    - [Manage your scopes with the `SymbolResolver`](#manage-your-scopes-with-the-symbolresolver)
   - [Register symbols to resolve](#register-symbols-to-resolve)
   - [Solvers](#solvers)
     - [Existing solvers](#existing-solvers)
@@ -68,6 +70,34 @@ visitor resolveUnresolvedSymbols
 > The symbol resolution comes by default with a safe guard against errors to not make the full symbol resolution fail. For more info check section [Error repport](#error-repport)
 
 ## Manage your scopes
+
+One important part of the symbol resolution is to know the scope on the symbol to resolve. In order to manage this, we are saving a stack of the scopes. 
+
+### Understanding the importance of scopes
+
+To make it easier to understand the principles, let's take an example with some Pharo code:
+
+![Scope examples with Pharo](scopes.png)
+
+We can see in this example that we are parsing the method `#myExampleMethod` that is in a protocol `generation`, in a class named `MyExampleClass` in a package named `MyExamplePackage`.
+
+The class has an instance variable named `instanceVar`. The method has a temporary named `temp` and a block with a temporary named `blockTemp`.
+
+Now lets imagine we want to resolve the accesses 1, 2 and 3 on this example. In order to do that, we need to know the context of those accesses because it is possible that we do not have only one variable named `blockTemp` or `temp` or `instanceVar` in our project to parse and we need to find the right ones. This context is the stack on the left. We know that we are in a block, that is in `myExampleMethod` that is in the `generation` protocol, that is in the `MyExampleClass` class, that is en the `MyExamplePackage` package. From this, we have all the informations we need to resolve our 3 variables.
+
+1. Variable `blockTemp`
+
+This variable is easy to resolve since it is defined in the top scope that is the block in which it is currently. We just have to ask the variables of this block and we have our real variable.
+
+2. Variable `temp`
+
+For this one, we start to look for the variables in our top scope: the block. We do not have any variable of this name defined here. So we will go lower in our stack and check the second scope: `#myExampleMethod`. Here we find a temporary variable named `temp`. Our second symbol is resolved.
+
+3. Variable `instanceVar`
+
+As for `temp` we start to look in the variables of the block but none match. We go down in the stack but we don't have any variable of this name in `#myExampleMethod`. Same for the 3rd element of the stack, the `generation` protocol since protocols do not have variables. We then get to the `MyExampleClass` class and here we find an instance variable of the right name. We can end our visit since we found the entity corresponding to our symbol.
+
+### Manage your scopes with the `SymbolResolver`
 
 TODO
 
