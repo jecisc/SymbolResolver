@@ -6,12 +6,14 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 - [User Documentation of the Symbol Resolver](#user-documentation-of-the-symbol-resolver)
   - [Getting started](#getting-started)
   - [Manage your scopes](#manage-your-scopes)
+  - [Register symbols to resolve](#register-symbols-to-resolve)
   - [Solvers](#solvers)
     - [Existing solvers](#existing-solvers)
     - [Add you own solver](#add-you-own-solver)
   - [Error repport](#error-repport)
   - [Aliases](#aliases)
 
+<!-- /TOC -->
 <!-- /TOC -->
 
 This documentation is still a WIP. I'll add parts when I get the time little by little
@@ -26,9 +28,50 @@ A classic architecture for the development of a parser to build a model is to:
 - Visit a first time this AST to build all entities of the model
 - Visit a second time this AST to build all relations between entities of the model (We need a second pass because we need to ensure that all entities are created before we resolve links between them)
 
-TODO
+> [!NOTE]
+> Since this is a documentation of `Symbol Resolver`, lets defined what is a `Symbol`. A `Symbol` in the scope of this documentation is a dependency to resolve during the parsing. We call that a symbol because before the resolution we only have the name of the entity we depend on (this name or path is what we call a `Symbol`) and then the resolver is using this name and the context in which this symbols is defined to find the real entity related to this name.
+
+This project aims to simplify this last step. With this project you need only one visitor. Instead of doing a second visit, we can register symbols to resolve during the first visit, `SRSymbolsResolver` will register them with a copy of the scopes and we are able to resolve all of them at the end when all entities to resolve are created.
+
+> [!NOTE]
+> In the following documentation I'll use the Moose Python parser to give examples of usage of SymbolResolver
+
+The first step to get started is to make the visitor use the trait `SRTSolverUserVisitor`:
+
+```st
+PyRootNodeVisitor << #FamixPythonImporterVisitor
+	traits: {SRTSolverUserVisitor};
+	slots: { #model . #rootFilePath };
+	tag: 'Visitors';
+	package: 'Famix-Python-Importer'
+```
+
+Then we need to call `#initializeSolver` in the initialization of the visitor:
+
+```st
+FamixPythonImporterVisitor>>initialize
+
+	super initialize.
+	model := FamixPythonModel named: 'Default Python Model'. "This will be updated later"
+	self initialiseSolver 
+```
+
+Once this is done, we are be able to build a scope stack during the visit (See [Manage your scopes](#manage-your-scopes)) and we can register symbols to resolve (See section [Register symbols to resolve](#register-symbols-to-resolve)).
+
+Then at the end of the visit you can call `#resolveUnresolvedSymbols` in order to launch the resolution of all registered symbols.
+
+```st
+visitor resolveUnresolvedSymbols
+```
+
+> [!TIP]
+> The symbol resolution comes by default with a safe guard against errors to not make the full symbol resolution fail. For more info check section [Error repport](#error-repport)
 
 ## Manage your scopes
+
+TODO
+
+## Register symbols to resolve
 
 TODO
 
