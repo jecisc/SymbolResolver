@@ -85,6 +85,8 @@ The class has an instance variable named `instanceVar`. The method has a tempora
 
 Now lets imagine we want to resolve the accesses 1, 2 and 3 on this example. In order to do that, we need to know the context of those accesses because it is possible that we do not have only one variable named `blockTemp` or `temp` or `instanceVar` in our project to parse and we need to find the right ones. This context is the stack on the left. We know that we are in a block, that is in `myExampleMethod` that is in the `generation` protocol, that is in the `MyExampleClass` class, that is en the `MyExamplePackage` package. From this, we have all the informations we need to resolve our 3 variables.
 
+![Scope variables](scopes2.png)
+
 1. Variable `blockTemp`
 
 This variable is easy to resolve since it is defined in the top scope that is the block in which it is currently. We just have to ask the variables of this block and we have our real variable.
