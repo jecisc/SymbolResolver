@@ -142,10 +142,10 @@ Let's rewrite our previous example with this:
 visitClassDefinition: aClassDef
 
 	^ self
-        useCurrentEntity: (self ensureClass: aClassDef)
-        during: [
-            super visitClassDefinition: aClassDef.
-            class methods do: [ :method | method parentType: self currentEntity ] ]
+            useCurrentEntity: (self ensureClass: aClassDef)
+            during: [
+                super visitClassDefinition: aClassDef.
+                class methods do: [ :method | method parentType: self currentEntity ] ]
 ```
 
 Now imagine we want to check if the current entity we have has already a module of a certain name. But it is possible we have no current entity. We can use this piece of code:
@@ -165,11 +165,61 @@ This should let you build your scopes stack easily. The stack is useful for the 
 
 ## Register symbols to resolve
 
-TODO
+In order to launch a symbol resolution we need to register it. To do this we first need to instantiate a subclass of `SRResolveable`. The subclass will depend on how the symbol should be resolved. It can be a subclass provided by the project or a subclass implemented by yourself in case the symbol resolution is specific to your project. For more info check the section [Solvers](#solvers).
+
+Then we can use `#resolve:foundAction:` in order to register the resolution:
+
+```st
+createImport: anImport ofName: aName from: fromName alias: alias
+
+	| import |
+	import := model newImport
+		          alias: alias;
+		          yourself.
+
+	self setSourceAnchor: import from: anImport.
+
+	self currentEntity addOutgoingImport: import.
+
+	self solver
+		resolve: (FamixPythonImportResolvable path: aName)
+		foundAction: [ :entity :currentEntity | entity addIncomingImport: import ].
+
+	^ import
+```
+
+In this example `FamixPythonImportResolvable path: aName` is the Resolvable.
+
+It is also possible to register in any `SRResolvable` a replacement block. In case an entity is not resolved, it allows one to provide an alternative. For example, a stubed entity.
+
+```st
+createImport: anImport ofName: aName from: fromName alias: alias
+
+	| import |
+	import := model newImport
+		          alias: alias;
+		          yourself.
+
+	self setSourceAnchor: import from: anImport.
+
+	self currentEntity addOutgoingImport: import.
+
+	self solver
+		resolve: ((FamixPythonImportResolvable path: aName)
+				 notFoundReplacementEntity: [ :unresolvedImport :currentEntity | self ensureStubPackagesFromPath: unresolvedImport path ];
+				 yourself)
+		foundAction: [ :entity :currentEntity | entity addIncomingImport: import ].
+
+	^ import
+```
+
+In this version the found action will be executed with a stub package in case we cannot resolve the import.
+
+A last option is to use `#resolve:onNotFoundDo:` in order to deal with not found entities.
 
 ## Solvers 
 
-TODO
+As said previously, the actual resolution is happening in the subclasses of `SRResolvable`. In this section we will present the existing solvers and how to implement your own.
 
 ### Existing solvers 
 
