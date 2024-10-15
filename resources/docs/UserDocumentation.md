@@ -14,7 +14,11 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
     - [Add you own solver](#add-you-own-solver)
   - [Error repport](#error-repport)
   - [Aliases](#aliases)
+  - [Advance cases](#advance-cases)
+    - [Concept of Main Entity](#concept-of-main-entity)
 
+<!-- /TOC -->
+<!-- /TOC -->
 <!-- /TOC -->
 <!-- /TOC -->
 
@@ -101,7 +105,63 @@ As for `temp` we start to look in the variables of the block but none match. We 
 
 ### Manage your scopes with the `SymbolResolver`
 
-TODO
+It is important to build the scopes stack while visiting your AST in order to have a right symbol resolution. For this, `SRTSolverUserVisitor` and `SRSymbolsResolver` provides some API:
+
+- `#currentEntity:` Pushes the parameter as top of the stack in the scopes and consider this entity as the current entity of the resolution
+- `#pushEntityAsScope:` Pushes the parameter as top of the stack in the scopes but does not consider it as the current entity of the resolution
+- `#currentEntity` Gets the current entity of the resolution (will return the first entity of the stack consider as a current entity)
+- `#topScope` Gets the top of the scopes stack
+- `#popScope` Pops the top of the scopes stack
+
+Here is an example:
+
+```st
+visitClassDefinition: aClassDef
+
+	| class |
+	class := self ensureClass: aClassDef.
+
+	self currentEntity: class.
+
+	super visitClassDefinition: aClassDef.
+	class methods do: [ :method | method parentType: self currentEntity ].
+
+	self popScope.
+	^ class
+```
+
+Some suggar is provided to manage most of the cases:
+- `#useCurrentEntity:during:` allow to set the current entity for the execution of a block
+- `#withCurrentEntityDo:` execute a block taking the current entity as a parameter. In case there is no entity in the scopes, do nothing
+- `#currentEntityOfType:` gets the first current entity of a given type
+
+
+Let's rewrite our previous example with this:
+
+```st
+visitClassDefinition: aClassDef
+
+	^ self
+        useCurrentEntity: (self ensureClass: aClassDef)
+        during: [
+            super visitClassDefinition: aClassDef.
+            class methods do: [ :method | method parentType: self currentEntity ] ]
+```
+
+Now imagine we want to check if the current entity we have has already a module of a certain name. But it is possible we have no current entity. We can use this piece of code:
+
+```st
+ensureModuleNamed: moduleName fromNode: aModuleNode
+
+	self withCurrentEntityDo: [ :entity |
+		(entity query descendants ofType: FamixTModule)
+			detect: [ :module | module name = moduleName ]
+			ifFound: [ :module | ^ module ] ].
+
+	^ self createModule: aModuleNode named: moduleName
+```
+
+This should let you build your scopes stack easily. The stack is useful for the symbol resolution but can also be useful during the visit to query the parents of the entities we are building.
 
 ## Register symbols to resolve
 
@@ -160,5 +220,11 @@ API:
 > While developping a parser it might be interesting to have an actual debugger instead of catching all the errors. It is possible to go in development mode via the world menu: `Debug > Toggle Symbol Resolver Debug mode`
 
 ## Aliases
+
+TODO
+
+## Advance cases
+
+### Concept of Main Entity
 
 TODO
