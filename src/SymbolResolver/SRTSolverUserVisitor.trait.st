@@ -58,11 +58,6 @@ SRTSolverUserVisitor >> pushEntityAsScope: anEntity [
 ]
 
 { #category : 'resolution' }
-SRTSolverUserVisitor >> resolve: aResolvable [
-	self solver resolve: aResolvable
-]
-
-{ #category : 'resolution' }
 SRTSolverUserVisitor >> resolve: aSRResolvable foundAction: aBlockClosure [ 
 	^ self solver resolve: aSRResolvable foundAction: aBlockClosure .
 ]
@@ -89,6 +84,12 @@ SRTSolverUserVisitor >> resolveUnresolvedSymbols [
 { #category : 'accessing' }
 SRTSolverUserVisitor >> solver [
 	^ solver ifNil: [ self error: 'The solver has not been initialized. Call #initializeSolver or #initializeFutureSolver in the #initialize method.' ]
+]
+
+{ #category : 'scope' }
+SRTSolverUserVisitor >> topScope [
+
+	^ self solver topScope
 ]
 
 { #category : 'accessing' }
