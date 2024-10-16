@@ -147,7 +147,7 @@ visitClassDefinition: aClassDef
             useCurrentEntity: (self ensureClass: aClassDef)
             during: [
                 super visitClassDefinition: aClassDef.
-                class methods do: [ :method | method parentType: self currentEntity ] ]
+                self currentEntity methods do: [ :method | method parentType: self currentEntity ] ]
 ```
 
 Now imagine we want to check if the current entity we have has already a module of a certain name. But it is possible we have no current entity. We can use this piece of code:
