@@ -34,6 +34,8 @@ A classic architecture for the development of a parser to build a model is to:
 - Visit a first time this AST to build all entities of the model
 - Visit a second time this AST to build all relations between entities of the model (We need a second pass because we need to ensure that all entities are created before we resolve links between them)
 
+![Schema of parsing flow](parsing.png)
+
 > [!NOTE]
 > Since this is a documentation of `Symbol Resolver`, lets defined what is a `Symbol`. A `Symbol` in the scope of this documentation is a dependency to resolve during the parsing. We call that a symbol because before the resolution we only have the name of the entity we depend on (this name or path is what we call a `Symbol`) and then the resolver is using this name and the context in which this symbols is defined to find the real entity related to this name.
 
