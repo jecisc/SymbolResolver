@@ -12,11 +12,13 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
   - [Solvers](#solvers)
     - [Existing solvers](#existing-solvers)
     - [Add you own solver](#add-you-own-solver)
+  - [Make your model compatible with the Symbol Resolver](#make-your-model-compatible-with-the-symbol-resolver)
   - [Error repport](#error-repport)
   - [Aliases](#aliases)
   - [Advance cases](#advance-cases)
     - [Concept of Main Entity](#concept-of-main-entity)
 
+<!-- /TOC -->
 <!-- /TOC -->
 <!-- /TOC -->
 <!-- /TOC -->
@@ -236,6 +238,12 @@ TODO - Add description on how to implement the Solver
 The actual resolution should be implemented in the method `MyResolvable>>#resolveInScope:currentEntity:`. This method takes the current scope and the current entity as a parameter. 
 The method will be called first in the top scope. In case the entity is not found, you should throw a `NotFound` error. In that case, the solver will catch this error and try in the next scope until there is no scope left to look into. If that's happening, then the replacement strategy will be triggered. 
 In some cases it is also possible that we know that an entity will not be found in any scope left to search. In that case, it is possible to raise a `SRNoResolutionPossible` error instead of a `NotFound`. This will stop the resolution right away and delegate the resolution to the replacement strategy. This is an optimization.
+
+## Make your model compatible with the Symbol Resolver
+
+TODO
+
+reachableEntities and co
 
 ## Error repport
 
