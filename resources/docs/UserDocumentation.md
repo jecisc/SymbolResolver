@@ -219,7 +219,19 @@ createImport: anImport ofName: aName from: fromName alias: alias
 
 In this version the found action will be executed with a stub package in case we cannot resolve the import.
 
-A last option is to use `#resolve:onNotFoundDo:` in order to deal with not found entities.
+A last option is to use `#resolve:foundAction:ifNone:` in order to deal with not found entities. It happens sometimes that we want to try to resolve something but it is possible that there is nothing to find and we don't want to generate a stub. For example:
+
+```st
+(aMethodNode name beginsWith: 'get_') ifTrue: [
+		self
+			resolve: ((SRIdentifierWithNode identifier: (aMethodNode name withoutPrefix: 'get_'))
+					 expectedKind: FamixPythonAttribute;
+					 yourself)
+			foundAction: [ :entity :currentEntity | entity beGetter ]
+			ifNone: [ "We do nothing" ] ].
+```
+
+In this case, we want to check if the method is a getter by checking if we have an instance variable of this name. But if there is no attribute of this name, then we want to do nothing.
 
 ## Solvers 
 
