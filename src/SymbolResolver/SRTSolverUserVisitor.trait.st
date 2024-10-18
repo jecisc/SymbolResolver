@@ -63,16 +63,15 @@ SRTSolverUserVisitor >> resolve: aSRResolvable foundAction: aBlockClosure [
 ]
 
 { #category : 'resolution' }
-SRTSolverUserVisitor >> resolve: identifiers onNotFoundDo: aBlock [
-	^ [ self solver resolve: identifiers ]
-		on: SRReferencesNotFound
-		do: [ aBlock value: identifiers ]
+SRTSolverUserVisitor >> resolve: identifiers foundAction: aBlock ifNone: anotherBlock [
+
+	^ self solver resolve: identifiers foundAction: aBlock ifNone: anotherBlock
 ]
 
 { #category : 'resolution' }
 SRTSolverUserVisitor >> resolveSilently: identifiers [
 
-	self errorReport catch: SRReferencesNotFound during: [ self resolve: identifiers ]
+	self errorReport catch: SRReferenceNotFound during: [ self resolve: identifiers ]
 ]
 
 { #category : 'resolution' }

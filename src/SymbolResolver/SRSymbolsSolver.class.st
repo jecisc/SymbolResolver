@@ -164,12 +164,18 @@ SRSymbolsSolver >> removeScope: aPSQLScope [
 
 { #category : 'accessing' }
 SRSymbolsSolver >> resolve: aResolvable foundAction: aBlockClosure [
-	^ self toResolve
-		addLast:
-			(SRResolvableWithContext
-				newFromScopes: self scopes
-				identifiers: aResolvable
-				foundAction: aBlockClosure)
+
+	^ self resolve: aResolvable foundAction: aBlockClosure ifNone: nil
+]
+
+{ #category : 'accessing' }
+SRSymbolsSolver >> resolve: aResolvable foundAction: aBlockClosure ifNone: anotherBlock [
+
+	^ self toResolve addLast: (SRResolvableWithContext
+			   newFromScopes: self scopes
+			   resolvable: aResolvable
+			   foundAction: aBlockClosure
+			   ifNone: anotherBlock)
 ]
 
 { #category : 'resolution' }

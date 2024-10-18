@@ -8,7 +8,8 @@ Class {
 	#instVars : [
 		'scopes',
 		'resolvable',
-		'foundAction'
+		'foundAction',
+		'notFoundAction'
 	],
 	#category : 'SymbolResolver-Solver',
 	#package : 'SymbolResolver',
@@ -16,12 +17,13 @@ Class {
 }
 
 { #category : 'instance creation' }
-SRResolvableWithContext class >> newFromScopes: aCollectionOfScopes identifiers: aResolvable foundAction: aBlockClosure [
+SRResolvableWithContext class >> newFromScopes: aCollectionOfScopes resolvable: aResolvable foundAction: aBlockClosure ifNone: anotherBlock [
+
 	^ self new
-		scopes: aCollectionOfScopes;
-		resolvable: aResolvable;
-		foundAction: aBlockClosure;
-		yourself
+		  scopes: aCollectionOfScopes;
+		  resolvable: aResolvable;
+		  foundAction: aBlockClosure;
+		  notFoundAction: anotherBlock yourself
 ]
 
 { #category : 'accessing' }
@@ -40,6 +42,24 @@ SRResolvableWithContext >> foundAction [
 { #category : 'accessing' }
 SRResolvableWithContext >> foundAction: anObject [
 	foundAction := anObject
+]
+
+{ #category : 'testing' }
+SRResolvableWithContext >> hasNotFoundAction [
+
+	^ notFoundAction isNotNil
+]
+
+{ #category : 'accessing' }
+SRResolvableWithContext >> notFoundAction [
+
+	^ notFoundAction
+]
+
+{ #category : 'accessing' }
+SRResolvableWithContext >> notFoundAction: anObject [
+
+	notFoundAction := anObject
 ]
 
 { #category : 'printing' }
@@ -64,10 +84,20 @@ SRResolvableWithContext >> resolvable: anObject [
 
 { #category : 'resolution' }
 SRResolvableWithContext >> resolve [
+
 	"first we try to resolve the resolvable in each scope"
 	self tryToResolveInScopes.
-	self resolvable isResolved ifFalse: [ self tryToApplyReplacementStrategy ].
-	self triggerFoundActionWithCurrentEntity.
+
+	"If we did not find the entity then we try the replacement strategy to have another entity. 
+	In case we still do not find anything we either execute the not found action or let the not found error pass to the user."
+	[ self resolvable isResolved ifFalse: [ self tryToApplyReplacementStrategy ] ]
+		on: SRReferenceNotFound
+		do: [ :notFound |
+			^ self hasNotFoundAction
+				  ifTrue: [ self notFoundAction cull: self resolvable cull: self currentEntity ]
+				  ifFalse: [ notFound pass ] ].
+
+	self triggerFoundActionWithCurrentEntity
 ]
 
 { #category : 'accessing' }
@@ -94,10 +124,12 @@ SRResolvableWithContext >> triggerFoundActionWithCurrentEntity [
 
 { #category : 'resolution' }
 SRResolvableWithContext >> tryToApplyReplacementStrategy [
+
 	self resolvable hasReplacementStrategy
-		ifTrue: [ self resolvable  applyReplacementStrategyWithCurrentEntity: self currentEntity.
+		ifTrue: [
+			self resolvable applyReplacementStrategyWithCurrentEntity: self currentEntity.
 			self assert: self resolvable isResolved description: 'We should always have a resolved element at this time, even if this entity is a stub' ]
-		ifFalse: [ SRReferencesNotFound signalIdentifiers: self resolvable ]
+		ifFalse: [ SRReferenceNotFound signal: self resolvable ]
 ]
 
 { #category : 'resolution' }

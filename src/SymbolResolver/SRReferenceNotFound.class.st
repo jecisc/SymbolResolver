@@ -2,10 +2,10 @@
 I am an error that occurs when the solver do not find the reference
 "
 Class {
-	#name : 'SRReferencesNotFound',
+	#name : 'SRReferenceNotFound',
 	#superclass : 'Error',
 	#instVars : [
-		'identifiers'
+		'identifier'
 	],
 	#category : 'SymbolResolver-Errors',
 	#package : 'SymbolResolver',
@@ -13,26 +13,26 @@ Class {
 }
 
 { #category : 'exceptioninstantiator' }
-SRReferencesNotFound class >> signal: anIdentifier [
+SRReferenceNotFound class >> signal: anIdentifier [
 	^ self new
 		identifier: anIdentifier;
 		signal
 ]
 
 { #category : 'accessing' }
-SRReferencesNotFound >> identifiers [
-	^ identifiers
+SRReferenceNotFound >> identifier [
+	^ identifier
 ]
 
 { #category : 'accessing' }
-SRReferencesNotFound >> identifiers: anObject [
-	identifiers := anObject
+SRReferenceNotFound >> identifier: anObject [
+	identifier := anObject
 ]
 
 { #category : 'printing' }
-SRReferencesNotFound >> printOn: aStream [
+SRReferenceNotFound >> printOn: aStream [
 	super printOn: aStream.
 	aStream << $(.
-	self identifiers printOn: aStream.
+	self identifier printOn: aStream.
 	aStream << $)
 ]
