@@ -2,6 +2,7 @@ SmalltalkCISpec {
   #loading : [
     SCIMetacelloLoadSpec {
       #baseline : 'SymbolResolver',
+      #load : [ 'Tests' ],
       #directory : 'src'
     }
   ]
