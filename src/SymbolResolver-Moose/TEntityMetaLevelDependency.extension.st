@@ -13,7 +13,11 @@ TEntityMetaLevelDependency >> childOfType: aType named: aString [
 TEntityMetaLevelDependency >> definedEntitiesNamed: aString ofKinds: aCollection [
 	"In this version we do not check the imports because we want to check imports only at 1 level"
 
-	^ (self query descendants ofAnyType: aCollection) select: [ :child | child name = aString ]
+	| possibleKinds result |
+	possibleKinds := aCollection copyWithout: self class. "If we have my class in the list I'll not check the children..."
+	result := self query descendants ofAnyType: possibleKinds.
+	(aCollection includes: self class) ifTrue: [ result add: self ].
+	^ result select: [ :child | child name = aString ]
 ]
 
 { #category : '*SymbolResolver-Moose' }
