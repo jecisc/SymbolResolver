@@ -13,14 +13,6 @@ Class {
 	#tag : 'Core'
 }
 
-{ #category : 'instance creation' }
-SRInvocationWithNode class >> identifier: anIdentifier node: aNode expectedKind: aKind arguments: aCollectionOfArguments [
-	^ (self identifier: anIdentifier node: aNode)
-		expectedKind: aKind;
-		arguments: aCollectionOfArguments;
-		yourself
-]
-
 { #category : 'hooks' }
 SRInvocationWithNode >> applyReplacementStrategyWithCurrentEntity: aCurrentEntity [
 	self

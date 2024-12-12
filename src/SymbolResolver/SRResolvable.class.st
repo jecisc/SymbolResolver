@@ -5,7 +5,6 @@ Class {
 	#name : 'SRResolvable',
 	#superclass : 'Object',
 	#instVars : [
-		'node',
 		'expectedKind',
 		'notFoundReplacementEntity'
 	],
@@ -13,26 +12,6 @@ Class {
 	#package : 'SymbolResolver',
 	#tag : 'Core'
 }
-
-{ #category : 'instance creation' }
-SRResolvable class >> identifier: anIdentifier expectedKind: aKind node: aNode [ 
-	^ (self identifier: anIdentifier node: aNode)
-		expectedKind: aKind;
-		yourself
-]
-
-{ #category : 'instance creation' }
-SRResolvable class >> identifier: aString expectedKind: aClass node: aPGTASTIdentifier notFoundReplacementEntity: aBlockClosure [ 
-	^ (self identifier: aString expectedKind: aClass node: aPGTASTIdentifier) notFoundReplacementEntity: aBlockClosure ; yourself
-]
-
-{ #category : 'instance creation' }
-SRResolvable class >> identifier: aStringIdentifier node: aPSQLASTIdentifier [
-	^ self new
-		identifier: aStringIdentifier;
-		node: aPSQLASTIdentifier;
-		yourself
-]
 
 { #category : 'hooks' }
 SRResolvable >> applyReplacementStrategyWithCurrentEntity: aCurrentEntity [
@@ -79,16 +58,6 @@ SRResolvable >> isResolvable [
 { #category : 'testing' }
 SRResolvable >> isResolved [
 	^ self entity notNil
-]
-
-{ #category : 'accessing' }
-SRResolvable >> node [
-	^ node
-]
-
-{ #category : 'accessing' }
-SRResolvable >> node: anObject [
-	node := anObject
 ]
 
 { #category : 'accessing' }

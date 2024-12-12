@@ -11,16 +11,11 @@ Class {
 }
 
 { #category : 'accessing' }
-SRThisWithNode class >> node: aNode [
-	^ self new node: aNode
-]
+SRThisWithNode class >> validationAsTypeBlock: validationAsTypeBlock [
 
-{ #category : 'accessing' }
-SRThisWithNode class >> node: aNode validationAsTypeBlock: validationAsTypeBlock [
 	^ self new
-		node: aNode;
-		validationAsTypeBlock: validationAsTypeBlock;
-		yourself
+		  validationAsTypeBlock: validationAsTypeBlock;
+		  yourself
 ]
 
 { #category : 'accessing' }
