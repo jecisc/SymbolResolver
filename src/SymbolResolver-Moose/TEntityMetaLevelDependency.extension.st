@@ -16,7 +16,9 @@ TEntityMetaLevelDependency >> definedEntitiesNamed: aString ofKinds: aCollection
 	| possibleKinds result |
 	possibleKinds := aCollection copyWithout: self class. "If we have my class in the list I'll not check the children..."
 	result := self query descendants ofAnyType: possibleKinds.
-	(aCollection includes: self class) ifTrue: [ result add: self ].
+	(aCollection includes: self class) ifTrue: [
+		result add: self.
+		result addAll: (self children select: [ :child | child isOfType: self class ]) ].
 	^ result select: [ :child | child name = aString ]
 ]
 
