@@ -5,6 +5,7 @@ Class {
 	#name : 'SRInvocationWithNode',
 	#superclass : 'SRResolvable',
 	#instVars : [
+		'identifier',
 		'arguments',
 		'candidates'
 	],
@@ -12,6 +13,14 @@ Class {
 	#package : 'SymbolResolver',
 	#tag : 'Core'
 }
+
+{ #category : 'accessing' }
+SRInvocationWithNode class >> identifier: anIdentifierString [
+
+	^ self new
+		  identifier: anIdentifierString;
+		  yourself
+]
 
 { #category : 'hooks' }
 SRInvocationWithNode >> applyReplacementStrategyWithCurrentEntity: aCurrentEntity [
@@ -41,9 +50,20 @@ SRInvocationWithNode >> candidates: anObject [
 
 { #category : 'accessing' }
 SRInvocationWithNode >> entity [
-	^ self candidates size = 1
-		ifTrue: [ self candidates anyOne ]
-		ifFalse: [ NotFound signal ]
+
+	^ self candidates
+]
+
+{ #category : 'accessing' }
+SRInvocationWithNode >> identifier [
+
+	^ identifier
+]
+
+{ #category : 'accessing' }
+SRInvocationWithNode >> identifier: anObject [
+
+	identifier := anObject
 ]
 
 { #category : 'resolution' }
