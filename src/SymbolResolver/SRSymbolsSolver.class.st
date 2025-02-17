@@ -186,7 +186,7 @@ SRSymbolsSolver >> resolve: aResolvable inScope: aScope [
 { #category : 'resolution' }
 SRSymbolsSolver >> resolveUnresolvedSymbols [
 
-	self toResolve do: [ :resolvable | self errorReport catch: Error during: [ resolvable resolve ] ] displayingProgress: 'References resolution'
+	self toResolve do: [ :resolvable | self errorReport catch: Exception during: [ resolvable resolve ] ] displayingProgress: 'References resolution'
 ]
 
 { #category : 'testing' }
