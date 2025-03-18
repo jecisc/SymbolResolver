@@ -57,6 +57,15 @@ SRSymbolsSolver >> errorReport [
 	^ errorReport ifNil: [ errorReport := SRParsingReport new ]
 ]
 
+{ #category : 'accessing' }
+SRSymbolsSolver >> hasCurrentEntity [
+
+	^ self scopes
+		  detect: #hasCurrentEntity
+		  ifFound: [ :scope | true ]
+		  ifNone: [ false ]
+]
+
 { #category : 'initialization' }
 SRSymbolsSolver >> initialize [
 

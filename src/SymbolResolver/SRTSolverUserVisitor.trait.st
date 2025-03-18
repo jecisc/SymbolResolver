@@ -37,6 +37,12 @@ SRTSolverUserVisitor >> errorReport [
 	^ self solver errorReport
 ]
 
+{ #category : 'testing' }
+SRTSolverUserVisitor >> hasCurrentEntity [
+
+	^ self solver hasCurrentEntity
+]
+
 { #category : 'initialization' }
 SRTSolverUserVisitor >> initialiseSolver [
 	solver := SRSymbolsSolver new
