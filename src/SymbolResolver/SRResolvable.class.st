@@ -40,6 +40,11 @@ SRResolvable >> expectedKinds [
 		ifFalse: [ {self expectedKind} ]
 ]
 
+{ #category : 'accessing' }
+SRResolvable >> expectedKinds: anObject [
+	expectedKind := anObject
+]
+
 { #category : 'testing' }
 SRResolvable >> hasReplacementStrategy [
 	^ self notFoundReplacementEntity isNotNil
