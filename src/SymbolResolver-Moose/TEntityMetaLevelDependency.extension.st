@@ -39,9 +39,3 @@ TEntityMetaLevelDependency >> reachableEntitiesNamed: aString ofKinds: aCollecti
 
 	^ entities
 ]
-
-{ #category : '*SymbolResolver-Moose' }
-TEntityMetaLevelDependency >> reacheableEntities [
-
-	^ self children
-]
