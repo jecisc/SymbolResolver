@@ -195,6 +195,9 @@ SRSymbolsSolver >> resolve: aResolvable inScope: aScope [
 { #category : 'resolution' }
 SRSymbolsSolver >> resolveUnresolvedSymbols [
 
+	"We start by reordering the list of resolvable to put those with the higher priority first."
+	self toResolve sort: [ :resolvableWithContext | resolvableWithContext resolvable priority ] descending.
+
 	self toResolve do: [ :resolvable | self errorReport catch: Exception during: [ resolvable resolve ] ] displayingProgress: 'References resolution'
 ]
 

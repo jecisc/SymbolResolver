@@ -1,12 +1,16 @@
 "
 I am a resolvable thing, i have an identifier and the solver will try to resolve me to fill the real entity (or candidates if multiple are possible).
+
+Optionaly I can have a priority in case some resolvables need to be resolved before others. 
+For example, in C you need to resolve the aliases (typedef) before resolving the declared types. In that case, we can set a higher priority to the alias.
 "
 Class {
 	#name : 'SRResolvable',
 	#superclass : 'Object',
 	#instVars : [
 		'expectedKind',
-		'notFoundReplacementEntity'
+		'notFoundReplacementEntity',
+		'priority'
 	],
 	#category : 'SymbolResolver-Core',
 	#package : 'SymbolResolver',
@@ -55,6 +59,13 @@ SRResolvable >> identifier [
 	^ self subclassResponsibility
 ]
 
+{ #category : 'initialization' }
+SRResolvable >> initialize [
+
+	super initialize.
+	priority := 10
+]
+
 { #category : 'testing' }
 SRResolvable >> isResolvable [
 	^ true
@@ -86,6 +97,18 @@ SRResolvable >> printOn: aStream [
 	aStream nextPut: $(.
 	self printIdentifierPath: aStream.
 	aStream nextPut: $)
+]
+
+{ #category : 'accessing' }
+SRResolvable >> priority [
+
+	^ priority
+]
+
+{ #category : 'accessing' }
+SRResolvable >> priority: anObject [
+
+	priority := anObject
 ]
 
 { #category : 'printing' }
