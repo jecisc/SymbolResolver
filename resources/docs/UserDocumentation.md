@@ -4,24 +4,21 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 <!-- TOC -->
 
 - [User Documentation of the Symbol Resolver](#user-documentation-of-the-symbol-resolver)
-  - [Getting started](#getting-started)
-  - [Manage your scopes](#manage-your-scopes)
-    - [Understanding the importance of scopes](#understanding-the-importance-of-scopes)
-    - [Manage your scopes with the `SymbolResolver`](#manage-your-scopes-with-the-symbolresolver)
-  - [Register symbols to resolve](#register-symbols-to-resolve)
-  - [Solvers](#solvers)
-    - [Existing solvers](#existing-solvers)
-    - [Add you own solver](#add-you-own-solver)
-  - [Make your model compatible with the Symbol Resolver](#make-your-model-compatible-with-the-symbol-resolver)
-  - [Error repport](#error-repport)
-  - [Aliases](#aliases)
-  - [Advance cases](#advance-cases)
-    - [Concept of Main Entity](#concept-of-main-entity)
+	- [Getting started](#getting-started)
+	- [Manage your scopes](#manage-your-scopes)
+		- [Understanding the importance of scopes](#understanding-the-importance-of-scopes)
+		- [Manage your scopes with the `SymbolResolver`](#manage-your-scopes-with-the-symbolresolver)
+	- [Register symbols to resolve](#register-symbols-to-resolve)
+		- [Resolution priority](#resolution-priority)
+	- [Solvers](#solvers)
+		- [Existing solvers](#existing-solvers)
+		- [Add you own solver](#add-you-own-solver)
+	- [Make your model compatible with the Symbol Resolver](#make-your-model-compatible-with-the-symbol-resolver)
+	- [Error repport](#error-repport)
+	- [Aliases](#aliases)
+	- [Advance cases](#advance-cases)
+		- [Concept of Main Entity](#concept-of-main-entity)
 
-<!-- /TOC -->
-<!-- /TOC -->
-<!-- /TOC -->
-<!-- /TOC -->
 <!-- /TOC -->
 
 This documentation is still a WIP. I'll add parts when I get the time little by little
@@ -232,6 +229,25 @@ A last option is to use `#resolve:foundAction:ifNone:` in order to deal with not
 ```
 
 In this case, we want to check if the method is a getter by checking if we have an instance variable of this name. But if there is no attribute of this name, then we want to do nothing.
+
+### Resolution priority
+
+In some cases, it is possible that we want to ensure that some symbols are resolved before others. For example, in C, we want to resolve the type aliases (typeDef) before resolving the defined types because we can point an alias. 
+
+In that case, it is possible to give a priority to a resolvable. The higher the priority is, the faster it will be resolved. The base priority value is 10.
+
+To resolve something faster you can do:
+
+```st
+(aMethodNode name beginsWith: 'get_') ifTrue: [
+		self
+			resolve: ((SRIdentifierWithNode identifier: (aMethodNode name withoutPrefix: 'get_'))
+					 expectedKind: FamixPythonAttribute;
+					 priority: 20; "Base priority is 10, so this will be resolved before the other things to resolve"
+					 yourself)
+			foundAction: [ :entity :currentEntity | entity beGetter ]
+			ifNone: [ "We do nothing" ] ].
+```
 
 ## Solvers 
 
