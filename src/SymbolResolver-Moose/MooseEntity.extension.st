@@ -5,7 +5,7 @@ MooseEntity >> childOfType: aType named: aString [
 	"This can be often useful in parser writtings in order to find if we already created some entities or not."
 
 	^ (self query descendants ofType: aType)
-		  detect: [ :child | child name = aString ]
+		  detect: [ :child | child matchesName: aString ]
 		  ifNone: [ nil ]
 ]
 
@@ -17,9 +17,9 @@ MooseEntity >> definedEntitiesNamed: aString ofKinds: aCollection [
 	possibleKinds := aCollection copyWithout: self class. "If we have my class in the list I'll not check the children..."
 	result := self query descendants ofAnyType: possibleKinds.
 	(aCollection includes: self class) ifTrue: [
-		result add: self.
-		result addAll: (self children select: [ :child | child isOfType: self class ]) ].
-	^ result select: [ :child | child name = aString ]
+			result add: self.
+			result addAll: (self children select: [ :child | child isOfType: self class ]) ].
+	^ result select: [ :child | child matchesName: aString ]
 ]
 
 { #category : '*SymbolResolver-Moose' }

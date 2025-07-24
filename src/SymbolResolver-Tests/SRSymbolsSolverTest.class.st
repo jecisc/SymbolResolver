@@ -47,13 +47,6 @@ SRSymbolsSolverTest >> testCurrentEntity [
 ]
 
 { #category : 'tests' }
-SRSymbolsSolverTest >> testDefineAliasInCurrentScopeFor [
-	self flag: #todo. "Add test."
-	self skip.
-	self fail
-]
-
-{ #category : 'tests' }
 SRSymbolsSolverTest >> testEnsureScopesAreCopied [
 	| firstScope scopesFirstState secondScope scopesSecondState |
 	firstScope := SREntityScope new.

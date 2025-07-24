@@ -40,11 +40,6 @@ SRSymbolsSolver >> currentEntityOfType: anEntityType [
 		ifNone: [ SRNoCurrentEntityOfSpecificTypeAvailable signalForType: anEntityType ReferencesResolver:  self ]) currentEntity
 ]
 
-{ #category : 'alias' }
-SRSymbolsSolver >> defineAliasInCurrentScope: aString for: aBlockClosure [
-	self topScope addAlias: aString forEntity: aBlockClosure value
-]
-
 { #category : 'accessing' }
 SRSymbolsSolver >> detect: aBlock [
 	"Detects the scope for which aBlock evaluates to true."

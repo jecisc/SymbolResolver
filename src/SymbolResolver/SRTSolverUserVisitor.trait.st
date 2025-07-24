@@ -26,11 +26,6 @@ SRTSolverUserVisitor >> currentEntityOfType: anEntityType [
 	^ self solver currentEntityOfType: anEntityType
 ]
 
-{ #category : 'alias' }
-SRTSolverUserVisitor >> defineAliasInCurrentScope: anAlias for: aBlockClosure [
-	^ self solver defineAliasInCurrentScope: anAlias for: aBlockClosure
-]
-
 { #category : 'accessing' }
 SRTSolverUserVisitor >> errorReport [
 

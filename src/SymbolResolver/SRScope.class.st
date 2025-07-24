@@ -9,16 +9,6 @@ Class {
 	#tag : 'Scopes'
 }
 
-{ #category : 'adding' }
-SRScope >> addAlias: anAlias forEntity: aCorrespondingEntity [
-	self aliases
-		add:
-			(SRAliasDefinition new
-				alias: anAlias;
-				entity: aCorrespondingEntity;
-				yourself)
-]
-
 { #category : 'accessing' }
 SRScope >> aliases [
 	^ aliases ifNil: [ aliases := OrderedCollection new ]

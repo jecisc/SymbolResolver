@@ -15,10 +15,16 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 		- [Add you own solver](#add-you-own-solver)
 	- [Make your model compatible with the Symbol Resolver](#make-your-model-compatible-with-the-symbol-resolver)
 	- [Error repport](#error-repport)
-	- [Aliases](#aliases)
+	- [Model integration](#model-integration)
+		- [Moose integration](#moose-integration)
+			- [Import management](#import-management)
+			- [Aliases management](#aliases-management)
 	- [Advance cases](#advance-cases)
 		- [Concept of Main Entity](#concept-of-main-entity)
 
+<!-- /TOC -->
+
+<!-- /TOC -->
 <!-- /TOC -->
 
 This documentation is still a WIP. I'll add parts when I get the time little by little
@@ -307,9 +313,49 @@ API:
 > [!TIP]
 > While developping a parser it might be interesting to have an actual debugger instead of catching all the errors. It is possible to go in development mode via the world menu: `Debug > Toggle Symbol Resolver Debug mode`
 
-## Aliases
+## Model integration
+
+The symbol resolver should be able to work with multiple kind of models even if it currently only includes a Moose integration.
+
+Let's see what is needed in order to irtegrate with a model.
 
 TODO
+
+### Moose integration
+
+TODO
+
+#### Import management
+
+TODO
+
+#### Aliases management 
+
+The management of aliases will depend on how the aliases are working in your language. Let's see it in this section. 
+
+In the Moose integration, we have methods looking for entities with a specific name. In the code directly present in the Symbol Resolver, the comparison of the name of the entities and the name provided by the user is done in `FamixTNamedEntity>>#matchesName:`. With this, it is possible to redefine it on some entities. For exemple:
+
+```st
+FamixEntityHoldingAliases>>matchesName: aString
+	self name = aString ifTrue: [ ^true ].
+
+	^ self aliases includes: aString
+
+```
+
+Like this, all aliases will be taken into consideration.
+
+Or if the entity does not hold the aliases itself:
+
+```st
+FamixEntityThatCanBeAliased>>matchesName: aString
+	self name = aString ifTrue: [ ^true ].
+
+	^ self aliases source aliasedName = aString
+
+```
+
+Those are just examples of how it can be done. The specifics will change for each languages.
 
 ## Advance cases
 
