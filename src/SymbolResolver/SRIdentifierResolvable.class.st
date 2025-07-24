@@ -21,8 +21,9 @@ SRIdentifierResolvable class >> identifier: anIdentifierString [
 
 { #category : 'class initialization' }
 SRIdentifierResolvable class >> initialize [
+	"Guard for old pharo version"
 
-	self deprecatedAliases: { #SRIdentifierWithNode }
+	(self repondsTo: #deprecatedAliases:) ifTrue: [ self deprecatedAliases: { #SRIdentifierWithNode } ]
 ]
 
 { #category : 'accessing' }
