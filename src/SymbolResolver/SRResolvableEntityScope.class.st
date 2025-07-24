@@ -21,7 +21,8 @@ SRResolvableEntityScope class >> resolvable: aSRResolvable [
 
 { #category : 'accessing' }
 SRResolvableEntityScope >> entity [
-	self assert:  self resolvable entity notNil description: 'We should always have resolved it before needing it'.
+
+	self assert: self resolvable result notNil description: 'We should always have resolved it before needing it'.
 	^ self resolvable entity
 ]
 

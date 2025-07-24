@@ -5,7 +5,7 @@ Class {
 	#name : 'SRCollectionScope',
 	#superclass : 'SRScope',
 	#instVars : [
-		'reachableEntitiesOwned'
+		'reachableEntities'
 	],
 	#category : 'SymbolResolver-Scopes',
 	#package : 'SymbolResolver',
@@ -15,16 +15,16 @@ Class {
 { #category : 'instance creation' }
 SRCollectionScope class >> reachableEntities: aCollection [
 	^ self new
-		reachableEntitiesOwned: aCollection;
+		reachableEntities: aCollection;
 		yourself
 ]
 
 { #category : 'accessing' }
-SRCollectionScope >> reachableEntitiesOwned [
-	^ reachableEntitiesOwned
+SRCollectionScope >> reachableEntities [
+	^ reachableEntities
 ]
 
 { #category : 'accessing' }
-SRCollectionScope >> reachableEntitiesOwned: anObject [
-	reachableEntitiesOwned := anObject
+SRCollectionScope >> reachableEntities: anObject [
+	reachableEntities := anObject
 ]

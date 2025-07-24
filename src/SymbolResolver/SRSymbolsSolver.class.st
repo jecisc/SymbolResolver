@@ -21,11 +21,6 @@ SRSymbolsSolver >> copyScopes [
 	^ scopes := scopes copy
 ]
 
-{ #category : 'manager' }
-SRSymbolsSolver >> createScopeManager [
-	^ SRScopeManager newAssociatedToSolver: self
-]
-
 { #category : 'accessing' }
 SRSymbolsSolver >> currentEntity [
 	^ (self scopes

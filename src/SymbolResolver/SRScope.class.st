@@ -9,29 +9,9 @@ Class {
 	#tag : 'Scopes'
 }
 
-{ #category : 'accessing' }
-SRScope >> aliases [
-	^ aliases ifNil: [ aliases := OrderedCollection new ]
-]
-
-{ #category : 'accessing' }
-SRScope >> aliases: anObject [
-	aliases := anObject
-]
-
-{ #category : 'helpers' }
-SRScope >> createReferenceEntityFrom: aFmxEntity [ 
-	"I am a convenient function that do nothing because an identifier pointed this scope (because of an aliasing)"
-]
-
 { #category : 'iterator' }
 SRScope >> detect: aBlockClosure [ 
-	^ self reachableEntitiesOwned detect: aBlockClosure
-]
-
-{ #category : 'accessing' }
-SRScope >> hasAliases [
-	^ aliases isNotNil and: [ aliases isNotEmpty ]
+	^ self reachableEntities detect: aBlockClosure
 ]
 
 { #category : 'testing' }
@@ -46,17 +26,11 @@ SRScope >> isEntityScope [
 
 { #category : 'accessing' }
 SRScope >> reachableEntities [
-	^ self hasAliases
-		ifTrue: [ self aliases , self reachableEntitiesOwned ]
-		ifFalse: [ self reachableEntitiesOwned ]
-]
 
-{ #category : 'accessing' }
-SRScope >> reachableEntitiesOwned [
-	^ self subclassResponsibility 
+	^ self subclassResponsibility
 ]
 
 { #category : 'iterator' }
 SRScope >> select: aBlockClosure [
-	^ self reachableEntitiesOwned select: aBlockClosure
+	^ self reachableEntities select: aBlockClosure
 ]

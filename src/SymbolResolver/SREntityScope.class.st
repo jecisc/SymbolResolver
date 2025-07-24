@@ -97,11 +97,11 @@ SREntityScope >> printOn: aStream [
 ]
 
 { #category : 'accessing' }
-SREntityScope >> reachableEntitiesNamed: aString ofKinds: aCollection [
-	^ self entity reachableEntitiesNamed: aString ofKinds: aCollection
+SREntityScope >> reachableEntities [
+	^ self entity reachableEntities
 ]
 
 { #category : 'accessing' }
-SREntityScope >> reachableEntitiesOwned [
-	^ self entity reachableEntities
+SREntityScope >> reachableEntitiesNamed: aString ofKinds: aCollection [
+	^ self entity reachableEntitiesNamed: aString ofKinds: aCollection
 ]

@@ -15,15 +15,6 @@ SRSymbolsSolverTest >> setUp [
 ]
 
 { #category : 'tests' }
-SRSymbolsSolverTest >> testCreateScopeManager [
-	| scopeManager |
-	scopeManager := referencesSolver createScopeManager.
-	
-	self assert: scopeManager class equals: SRScopeManager.
-	self assert: scopeManager associatedSolver equals: referencesSolver
-]
-
-{ #category : 'tests' }
 SRSymbolsSolverTest >> testCurrentEntity [
 	| currentEntity currentEntity2 |
 	self should: [ referencesSolver currentEntity ] raise: SRNoCurrentEntityAvailable.
@@ -81,7 +72,7 @@ SRSymbolsSolverTest >> testPushEntitiesAsScope [
 	referencesSolver pushEntitiesAsScope: entities.
 	
 	self assert: referencesSolver scopes first class equals: SRCollectionScope.
-	self assert: referencesSolver scopes first reachableEntitiesOwned equals: entities.
+	self assert: referencesSolver scopes first reachableEntities equals: entities.
 ]
 
 { #category : 'tests' }
@@ -167,13 +158,6 @@ SRSymbolsSolverTest >> testResolve [
 
 { #category : 'tests' }
 SRSymbolsSolverTest >> testResolveInScope [
-	self flag: #todo. "Add test."
-	self skip.
-	self fail
-]
-
-{ #category : 'tests' }
-SRSymbolsSolverTest >> testTopScopeReachableEntities [
 	self flag: #todo. "Add test."
 	self skip.
 	self fail
