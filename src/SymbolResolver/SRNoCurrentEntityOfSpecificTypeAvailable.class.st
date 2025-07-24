@@ -3,9 +3,8 @@ I am an error raised if we ask to the scopes the current entity of a specific ki
 "
 Class {
 	#name : 'SRNoCurrentEntityOfSpecificTypeAvailable',
-	#superclass : 'Error',
+	#superclass : 'SRSolverError',
 	#instVars : [
-		'referencesResolver',
 		'type'
 	],
 	#category : 'SymbolResolver-Errors',
@@ -19,16 +18,6 @@ SRNoCurrentEntityOfSpecificTypeAvailable class >> signalForType: aType Reference
 		type: aType;
 		referencesResolver: anObject;
 		signal
-]
-
-{ #category : 'accessing' }
-SRNoCurrentEntityOfSpecificTypeAvailable >> referencesResolver [
-	^ referencesResolver
-]
-
-{ #category : 'accessing' }
-SRNoCurrentEntityOfSpecificTypeAvailable >> referencesResolver: anObject [
-	referencesResolver := anObject
 ]
 
 { #category : 'accessing' }

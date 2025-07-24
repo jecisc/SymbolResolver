@@ -3,10 +3,7 @@ I am the error signaled by SRReferencesResolver if #currentEntity is called and 
 "
 Class {
 	#name : 'SRNoCurrentEntityAvailable',
-	#superclass : 'Error',
-	#instVars : [
-		'referencesResolver'
-	],
+	#superclass : 'SRSolverError',
 	#category : 'SymbolResolver-Errors',
 	#package : 'SymbolResolver',
 	#tag : 'Errors'
@@ -17,14 +14,4 @@ SRNoCurrentEntityAvailable class >> signalReferencesResolver: anObject [
 	self new
 		referencesResolver: anObject;
 		signal
-]
-
-{ #category : 'accessing' }
-SRNoCurrentEntityAvailable >> referencesResolver [
-	^ referencesResolver
-]
-
-{ #category : 'accessing' }
-SRNoCurrentEntityAvailable >> referencesResolver: anObject [
-	referencesResolver := anObject
 ]
