@@ -118,8 +118,9 @@ SRResolvableWithContext >> scopes: anObject [
 
 { #category : 'resolution' }
 SRResolvableWithContext >> triggerFoundActionWithCurrentEntity [
+
 	self assert: self foundAction notNil description: 'Found action must be set (otherwise no interest to resolve stuff)'.
-	self foundAction cull: self resolvable entity cull: self currentEntity
+	self foundAction cull: self resolvable result cull: self currentEntity
 ]
 
 { #category : 'resolution' }

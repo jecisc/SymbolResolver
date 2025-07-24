@@ -1,3 +1,6 @@
+"
+I am an error raised if we ask to the scopes the current entity of a specific kind but none matches this kind.
+"
 Class {
 	#name : 'SRNoCurrentEntityOfSpecificTypeAvailable',
 	#superclass : 'Error',

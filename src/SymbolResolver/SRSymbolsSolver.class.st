@@ -150,17 +150,6 @@ SRSymbolsSolver >> pushScopeBeforeMainEntityScope: aScope [
 	^ aScope 
 ]
 
-{ #category : 'detect' }
-SRSymbolsSolver >> reachableEntitiesFor: aScope detect: aBlockClosure ifFound: aBlockClosureAction [
-	"optimisation to avoid recreate collection"
-
-	aScope reachableEntities
-		detect: aBlockClosure
-		ifFound: [ :f | ^ aBlockClosureAction value: f ]
-		ifNone: [ "continue" ].
-	NotFound signal
-]
-
 { #category : 'removing' }
 SRSymbolsSolver >> removeScope: aPSQLScope [
 	self copyScopes remove: aPSQLScope
@@ -225,9 +214,4 @@ SRSymbolsSolver >> toResolve: anObject [
 { #category : 'accessing' }
 SRSymbolsSolver >> topScope [
 	^ self scopes top
-]
-
-{ #category : 'accessing' }
-SRSymbolsSolver >> topScopeReachableEntities [
-	^ self topScope reachableEntities
 ]

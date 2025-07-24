@@ -92,11 +92,6 @@ SRTSolverUserVisitor >> topScope [
 	^ self solver topScope
 ]
 
-{ #category : 'accessing' }
-SRTSolverUserVisitor >> topScopeReachableEntities [
-	^ self solver topScopeReachableEntities
-]
-
 { #category : 'scope' }
 SRTSolverUserVisitor >> useCurrentEntity: anEntity during: aBlock [
 	"Here we are not testing that we remove the right scope but if it's not the case, it's probably a bug"

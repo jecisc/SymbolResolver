@@ -104,7 +104,7 @@ SRSymbolsSolverTest >> testPushEntityBlockAsScope [
 	(entity stub reachableEntitiesNamed: #computer ofKinds: {nil}) willReturn: {computer}.
 	computer stub name willReturn: #computer.
 	referencesSolver pushScope: (SREntityScope currentEntity: entity).
-	referencesSolver pushResolvableAsScopeBeforeCurrentScope: (SRIdentifierWithNode identifier: 'computer') foundAction: [ isFoundActionTriggered := true ].
+	referencesSolver pushResolvableAsScopeBeforeCurrentScope: (SRIdentifierResolvable identifier: 'computer') foundAction: [ isFoundActionTriggered := true ].
 	self assert: referencesSolver scopes pop entity equals: entity.
 	self assert: referencesSolver scopes top class equals: SRResolvableEntityScope.
 	self deny: referencesSolver scopes top isResolved.
@@ -154,7 +154,7 @@ SRSymbolsSolverTest >> testResolve [
 	guillaume := Mock named: #Guillaume.
 	referencesSolver pushScope: (SREntityScope currentEntity: cyril).
 	referencesSolver
-		resolve: (SRIdentifierWithNode identifier: #guillaume)
+		resolve: (SRIdentifierResolvable identifier: #guillaume)
 		foundAction: [ :foundEntity :currentEntity | 
 			self assert: foundEntity equals: guillaume.
 			self assert: currentEntity equals: cyril.

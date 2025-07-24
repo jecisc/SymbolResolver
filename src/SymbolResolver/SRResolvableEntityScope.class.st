@@ -32,7 +32,8 @@ SRResolvableEntityScope >> foundAction: aBlockClosure [
 
 { #category : 'testing' }
 SRResolvableEntityScope >> isResolved [
-	^  self resolvable entity isNotNil 
+
+	^ self resolvable result isNotNil
 ]
 
 { #category : 'resolvable API' }

@@ -10,7 +10,8 @@ Class {
 	#instVars : [
 		'expectedKind',
 		'notFoundReplacementEntity',
-		'priority'
+		'priority',
+		'result'
 	],
 	#category : 'SymbolResolver-Core',
 	#package : 'SymbolResolver',
@@ -19,12 +20,22 @@ Class {
 
 { #category : 'hooks' }
 SRResolvable >> applyReplacementStrategyWithCurrentEntity: aCurrentEntity [
-	self subclassResponsibility 
+
+	self result: (self notFoundReplacementEntity cull: self cull: aCurrentEntity)
 ]
 
 { #category : 'accessing' }
 SRResolvable >> entity [
-	^ self subclassResponsibility  
+
+	self deprecated: 'Use #result instead' transformWith: '`@rcv entity' -> '`@rcv result'.
+	^ self result
+]
+
+{ #category : 'accessing' }
+SRResolvable >> entity: arg [
+
+	self deprecated: 'Use #result: instead' transformWith: '`@rcv entity: `@arg' -> '`@rcv result: `@arg'.
+	^ self result: arg
 ]
 
 { #category : 'accessing' }
@@ -73,7 +84,8 @@ SRResolvable >> isResolvable [
 
 { #category : 'testing' }
 SRResolvable >> isResolved [
-	^ self entity notNil
+
+	^ self result isNotNil
 ]
 
 { #category : 'accessing' }
@@ -119,6 +131,18 @@ SRResolvable >> representationString [
 { #category : 'resolution' }
 SRResolvable >> resolveInScope: aScope currentEntity: currentEntity [ 
 	^ self subclassResponsibility  
+]
+
+{ #category : 'accessing' }
+SRResolvable >> result [
+
+	^ result
+]
+
+{ #category : 'accessing' }
+SRResolvable >> result: anObject [
+
+	result := anObject
 ]
 
 { #category : 'accessing' }
