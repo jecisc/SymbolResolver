@@ -30,6 +30,12 @@ SRScope >> reachableEntities [
 	^ self subclassResponsibility
 ]
 
+{ #category : 'accessing' }
+SRScope >> reachableEntitiesNamed: aString ofKinds: aCollection [
+
+	^ self subclassResponsibility
+]
+
 { #category : 'iterator' }
 SRScope >> select: aBlockClosure [
 	^ self reachableEntities select: aBlockClosure

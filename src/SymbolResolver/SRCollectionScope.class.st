@@ -28,3 +28,9 @@ SRCollectionScope >> reachableEntities [
 SRCollectionScope >> reachableEntities: anObject [
 	reachableEntities := anObject
 ]
+
+{ #category : 'accessing' }
+SRCollectionScope >> reachableEntitiesNamed: aString ofKinds: aCollection [
+
+	^ self select: [ :entity | entity name = aString and: [ aCollection includes: entity ] ]
+]

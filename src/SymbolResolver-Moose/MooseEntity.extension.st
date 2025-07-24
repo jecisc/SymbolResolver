@@ -10,7 +10,18 @@ MooseEntity >> childOfType: aType named: aString [
 ]
 
 { #category : '*SymbolResolver-Moose' }
+MooseEntity >> definedEntities [
+	"Returns the list of entities I define. I will return my children. Be ceraful, this is only for one level. I do not check my children recusively because this should be managed by the scope lookup. If you miss entities, you probably miss a scope."
+
+	"In this version we do not check the imports because we want to check imports only at 1 level"
+
+	^ self query descendants ofAnyType
+]
+
+{ #category : '*SymbolResolver-Moose' }
 MooseEntity >> definedEntitiesNamed: aString ofKinds: aCollection [
+	"I will return the entities I define with a certain name and a certain type.  I will check my children. Be careful, this is only for one level. I do not check my children recusively because this should be managed by the scope lookup. If you miss entities, you probably miss a scope."
+
 	"In this version we do not check the imports because we want to check imports only at 1 level"
 
 	| possibleKinds result |
@@ -23,7 +34,22 @@ MooseEntity >> definedEntitiesNamed: aString ofKinds: aCollection [
 ]
 
 { #category : '*SymbolResolver-Moose' }
+MooseEntity >> reachableEntities [
+	"Returns the list of entities I can reach. I will return my children. Be ceraful, this is only for one level. I do not check my children recusively because this should be managed by the scope lookup. If you miss entities, you probably miss a scope.
+	
+	By default it is the entities I define, but this can depend on the language. Override me if it is the case."
+
+	"Ideally this method should be on TEntityMetaLevelDependency. But we want people to be able to override it to add specificities for their language, for example import management."
+
+	^ self definedEntities
+]
+
+{ #category : '*SymbolResolver-Moose' }
 MooseEntity >> reachableEntitiesNamed: aString ofKinds: aCollection [
+	"I will return the entities I I can reach with a certain name and a certain type.  I will check my children. Be careful, this is only for one level. I do not check my children recusively because this should be managed by the scope lookup. If you miss entities, you probably miss a scope.
+		
+	By default it is the entities I define, but this can depend on the language. Override me if it is the case."
+
 	"Ideally this method should be on TEntityMetaLevelDependency. But we want people to be able to override it to add specificities for their language, for example import management."
 
 	^ self definedEntitiesNamed: aString ofKinds: aCollection
