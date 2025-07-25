@@ -4,7 +4,7 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 <!-- TOC -->
 
 - [User Documentation of the Symbol Resolver](#user-documentation-of-the-symbol-resolver)
-	- [Getting started](#getting-started)
+	- [Getting strated with SymbolResolver](#getting-strated-with-symbolresolver)
 	- [Manage your scopes](#manage-your-scopes)
 		- [Understanding the importance of scopes](#understanding-the-importance-of-scopes)
 		- [Manage your scopes with the `SymbolResolver`](#manage-your-scopes-with-the-symbolresolver)
@@ -12,6 +12,8 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 		- [Resolution priority](#resolution-priority)
 	- [Solvers](#solvers)
 		- [Existing solvers](#existing-solvers)
+			- [SRIdentifierResovable](#sridentifierresovable)
+			- [SRLocalClassEntityResolvable](#srlocalclassentityresolvable)
 		- [Add you own solver](#add-you-own-solver)
 	- [Make your model compatible with the Symbol Resolver](#make-your-model-compatible-with-the-symbol-resolver)
 	- [Error repport](#error-repport)
@@ -21,17 +23,15 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 			- [Aliases management](#aliases-management)
 	- [Advance cases](#advance-cases)
 		- [Concept of Main Entity](#concept-of-main-entity)
+		- [Reacheable entities as scope](#reacheable-entities-as-scope)
+		- [Tree Sitter Famix Integration](#tree-sitter-famix-integration)
 
+<!-- /TOC -->
+<!-- /TOC -->
 <!-- /TOC -->
 
 <!-- /TOC -->
-<!-- /TOC -->
-
-This documentation is still a WIP. I'll add parts when I get the time little by little
-
-## Getting started
-
-The main goal of the symbol resolver is to simplify the symbol resolution during the development of a parser. 
+The main goal of the symbol resolver is to simplify the symbol resolution during the development of a parser/importer. 
 
 A classic architecture for the development of a parser to build a model is to:
 - Define a grammar and a paser for this grammar 
@@ -46,13 +46,15 @@ A classic architecture for the development of a parser to build a model is to:
 
 This project aims to simplify this last step. With this project you need only one visitor. Instead of doing a second visit, we can register symbols to resolve during the first visit, `SRSymbolsResolver` will register them with a copy of the scopes and we are able to resolve all of them at the end when all entities to resolve are created.
 
+## Getting strated with SymbolResolver
+
 > [!NOTE]
-> In the following documentation I'll use the Moose Python parser to give examples of usage of SymbolResolver
+> In the following documentation I'll use the [Moose Python Importer](https://github.com/moosetechnology/MoosePy) to give examples of usage of SymbolResolver
 
 The first step to get started is to make the visitor use the trait `SRTSolverUserVisitor`:
 
 ```st
-PyRootNodeVisitor << #FamixPythonImporterVisitor
+FamixPythonImporterVisitor << #FamixPythonImporterVisitor
 	traits: {SRTSolverUserVisitor};
 	slots: { #model . #rootFilePath };
 	tag: 'Visitors';
@@ -140,6 +142,7 @@ visitClassDefinition: aClassDef
 Some suggar is provided to manage most of the cases:
 - `#useCurrentEntity:during:` allow to set the current entity for the execution of a block
 - `#withCurrentEntityDo:` execute a block taking the current entity as a parameter. In case there is no entity in the scopes, do nothing
+- `#currentEntity` gets the first current entity of the scope stack
 - `#currentEntityOfType:` gets the first current entity of a given type
 
 
@@ -227,7 +230,7 @@ A last option is to use `#resolve:foundAction:ifNone:` in order to deal with not
 ```st
 (aMethodNode name beginsWith: 'get_') ifTrue: [
 		self
-			resolve: ((SRIdentifierWithNode identifier: (aMethodNode name withoutPrefix: 'get_'))
+			resolve: ((SRIdentifierResolvable identifier: (aMethodNode name withoutPrefix: 'get_'))
 					 expectedKind: FamixPythonAttribute;
 					 yourself)
 			foundAction: [ :entity :currentEntity | entity beGetter ]
@@ -247,7 +250,7 @@ To resolve something faster you can do:
 ```st
 (aMethodNode name beginsWith: 'get_') ifTrue: [
 		self
-			resolve: ((SRIdentifierWithNode identifier: (aMethodNode name withoutPrefix: 'get_'))
+			resolve: ((SRIdentifierResolvable identifier: (aMethodNode name withoutPrefix: 'get_'))
 					 expectedKind: FamixPythonAttribute;
 					 priority: 20; "Base priority is 10, so this will be resolved before the other things to resolve"
 					 yourself)
@@ -261,17 +264,163 @@ As said previously, the actual resolution is happening in the subclasses of `SRR
 
 ### Existing solvers 
 
-TODO
+Currently the project only have two provided solvers: `SRIdentifierResolvable` and `SRLocalClassEntityResolvable`.
+
+#### SRIdentifierResovable
+
+The goal of this resolvable is to provide a name and the kind of entity it can be, and the resovable will look if the element at the top of the stack has a child of this kind and name. Else, it will go to the next scope.
+
+> [!Note] 
+> In order for this solver to work, we need some integration with the model been used with the symbol resolver. A simple one is provided by default with Moose.
+> See section [Model integration](#model-integration).
+
+Let's check how to use this solver with a simple case: let's resolve a simple inheretance in Python. I have an `IdentifierNode` that just represent the name of the class I inherit from. I can do:
+
+```st
+FamixPythonImporterVisitor>>manageInheritanceDeclaredBy: superclassNode
+
+	| inheritance |
+	"The next line will create a FamixPythonInheritance with its source anchor and the subclass already set"
+	inheritance := self createInheritanceFrom: superclassNode.
+
+	self
+		resolve: ((SRIdentifierResolvable identifier: superclassNode sourceText) "This gives the name of the superclass"
+				 expectedKind: FamixPythonClass; "Here I difine that the entity I can find should be a class"
+				 notFoundReplacementEntity: [ :unresolvedSuperclass :currentEntity | self ensureStubClassNamed: unresolvedSuperclass identifier ]; "If I don't find the entity, I create a stub"
+				 yourself)
+		foundAction: [ :entity :currentEntity | inheritance superclass: entity ] "And now that I have the entity, stub or not, I can set the superclass in my association"
+```
+
+#### SRLocalClassEntityResolvable
+
+The goal of this resolvable is to find local entities in a class. 
+
+Typically, I'll be used to find methods or attributes invoked or accessed via a `this` or `self`. 
+
+For example in Python:
+
+```python
+class AClass:
+	def method(self):
+		return 1
+		
+	def method2(self):
+		return self.method() + 1
+```
+
+The `self.method()` invoke a local method to the AClass class. 
+
+I can be used like this:
+
+```st
+receiver = 'self' ifTrue: [
+	^ self
+		resolve: (SRLocalClassEntityResolvable identifier: aName expectedKind: FamixTMethod)
+		foundAction: [ :method :currentEntity | self createInvocationOf: method from: currentEntity node: aCallNode ] ].
+```
+
+If in your language you don't know if the entity is a method or an attribute, you can provide a collection for the kinds like this:
+
+```st
+	self
+		resolve: (SRLocalClassEntityResolvable identifier: aName expectedKind: {FamixTMethod. FamixTAttribute})
+		foundAction: [ :method :currentEntity | self createInvocationOf: method from: currentEntity node: aCallNode ]
+```
+
+You can also create a stub entity in case the method comes from a stub superclass:
+
+```st
+	self
+		resolve: 
+			((SRLocalClassEntityResolvable identifier: aName expectedKind: FamixTMethod)
+				notFoundReplacementEntity: [ :unresolved | self ensureStubMethodNamed: unresolved identifier ];
+				yourself)
+		foundAction: [ :method :currentEntity | self createInvocationOf: method from: currentEntity node: aCallNode ]
+```
+
+In the future, we might add other generic resolvable.
 
 ### Add you own solver
 
 It is highly possible that for some cases it is required to implement a solver that is not yet present in SymbolResolver. For example, depending on the language, the import system might differ and you need one with specificities.
 
-TODO - Add description on how to implement the Solver
+In that case, you will need to subclass `SRResovable`. Let's illustrate this with two simple cases in the python importer. 
+
+Case 1: Resolution of local method invocation
+
+> [!Note]
+> This solver we will explain is now the `SRLocalClassEntityResolvable` but this documentation was written when it was not yet in the SymbolResolver, but it was a class of the PythonImporter. But at least we will explore its implementation
+
+Imagine we have this code:
+
+```python
+class AClass:
+	def __init__(self, a):
+		self.a = a
+
+	def method_to_invoke(self):
+		return self.a + 3
+
+	def method_calling_other_method(self):
+		return self.method_to_invoke() + 4
+```
+
+We want to resolve `self.method_to_invoke()`. We know this is a a local method call. In that case I'll create a resolvable for this:
+
+```st
+SRResolvable << #FamixPythonLocalClassEntityResolvable
+	slots: { #identifier };
+	tag: 'Resolvables';
+	package: 'Famix-Python-Importer'
+```
+
+When we create a resolvable, we need to override the method `identifier` that is used to print the symbol to resolve when we inspect the resovable. In our case, it will just be an accessor:
+
+```st
+identifier
+	^ identifier
+```
+
+Now we can use our resolvable like this:
+
+```st
+receiver = 'self' ifTrue: [
+	^ self
+		resolve:
+			(FamixPythonLocalClassEntityResolvable new
+				identifier: aName;
+				expectedKind: FamixTMethod;
+				notFoundReplacementEntity: [ :unresolved | self ensureStubMethodNamed: unresolved identifier ];
+				yourself)
+		foundAction: [ :method :currentEntity | self createInvocationOf: method from: currentEntity node: aCallNode ] ].
+```
+
+> [!Note]
+> All resolvable can be configured with expected kinds using `#expectedKind:` or `#expectedKinds:`. You need to be careful to use them if necessary in your resolution.
+
+Now the last step is to implement the resolution in itself by overriding `SRResolvable>>#resolveInScope:currentEntity:`. 
 
 The actual resolution should be implemented in the method `MyResolvable>>#resolveInScope:currentEntity:`. This method takes the current scope and the current entity as a parameter. 
 The method will be called first in the top scope. In case the entity is not found, you should throw a `NotFound` error. In that case, the solver will catch this error and try in the next scope until there is no scope left to look into. If that's happening, then the replacement strategy will be triggered. 
 In some cases it is also possible that we know that an entity will not be found in any scope left to search. In that case, it is possible to raise a `SRNoResolutionPossible` error instead of a `NotFound`. This will stop the resolution right away and delegate the resolution to the replacement strategy. This is an optimization.
+
+```st
+resolveInScope: aScope currentEntity: currentEntity
+	"We just need to check the methods of the class."
+
+	aScope entity isClass ifFalse: [ NotFound signal ].
+
+	(aScope reachableEntitiesNamed: identifier ofKinds: self expectedKinds) ifNotEmpty: [ :entities | "I don't think we can have multiple results here."
+			self assert: entities size = 1.
+			^ self result: entities anyOne ].
+
+	SRNoResolutionPossible signal
+```
+
+
+TODO - Add description on how to implement the Solver
+
+
 
 ## Make your model compatible with the Symbol Resolver
 
@@ -360,5 +509,13 @@ Those are just examples of how it can be done. The specifics will change for eac
 ## Advance cases
 
 ### Concept of Main Entity
+
+TODO
+
+### Reacheable entities as scope
+
+TODO
+
+### Tree Sitter Famix Integration
 
 TODO
