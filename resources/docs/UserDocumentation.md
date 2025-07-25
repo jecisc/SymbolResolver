@@ -15,11 +15,11 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 			- [SRIdentifierResovable](#sridentifierresovable)
 			- [SRLocalClassEntityResolvable](#srlocalclassentityresolvable)
 		- [Add you own solver](#add-you-own-solver)
-	- [Error repport](#error-repport)
 	- [Model integration](#model-integration)
 		- [Moose integration](#moose-integration)
 			- [Import management](#import-management)
 			- [Aliases management](#aliases-management)
+	- [Error repport](#error-repport)
 	- [Advance cases](#advance-cases)
 		- [Concept of Main Entity](#concept-of-main-entity)
 		- [Reacheable entities as scope](#reacheable-entities-as-scope)
@@ -27,10 +27,6 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 
 <!-- /TOC -->
 <!-- /TOC -->
-
-<!-- /TOC -->
-The main goal of the symbol resolver is to simplify the symbol resolution during the development of a parser/importer. 
-
 A classic architecture for the development of a parser to build a model is to:
 - Define a grammar and a paser for this grammar 
 - Generate a pseudo AST matching the grammar and produce it via the parser
@@ -461,7 +457,6 @@ Now we can use this on like this:
 manageImportedInheritanceDeclaredBy: anAttributeNode
 
 	| inheritance importName className |
-	"We should never end up here because this means we have the sources of the imported entities but I'm still bulletproofing the parser in case we have some code that cannot run""If we did not find an import, we have a stub."
 	inheritance := self createInheritanceFrom: anAttributeNode.
 	importName := self visit: anAttributeNode _receiver.
 	className := self visit: anAttributeNode _value.
@@ -485,6 +480,118 @@ manageImportedInheritanceDeclaredBy: anAttributeNode
 
 This concludes the documentation on resolvables implementation.
 
+## Model integration
+
+The symbol resolver should be able to work with multiple kind of models even if it currently only includes a Moose integration.
+
+Some solvers are provided but they cannot know how to get the informations needed from the model you're using. This part needs a little bridge to work.
+
+Here are a few methods we need for the current solvers to work:
+- `#reachableEntities` : This methods should return all possible children of the entity. This should not be recursive! The recursion will be managed by visiting the different scopes of the resolution. Like this we can find the most precise entity
+- `#reachableEntitiesNamed:ofKinds:` : This methods should return the possible direct children of the entity of a certain type that matches the name provided
+
+With those two methods, all the solvers present in SymbolResolver should work. But maybe you will need more for you own solvers.
+
+### Moose integration
+
+This section will go over the Moose integration done in SymbolResolver and how to specialize it for your language.
+
+The Moose integration of SymbolResolver is currently loaded by default. If you do not need it, you'll need to load a specific group.
+
+Ideally, we should implement the methods to get the reacheable entities on `TEntityMEtaLevelDependency`. But doing this, it would be hard to specialize this Moose integration to add some specificities of your own language. So the methods got added on `MooseEntity`. Like this, each languages can specialize them in their `FamixXXXEntity` class. This mecanism also allows to have multiple importers using `SymbolResolver` without clashing with each other.
+
+Also, those methods were thought to have hooks in order to easily specialize them for the language you are managing.
+
+For example:
+
+```st
+reachableEntitiesNamed: aString ofKinds: aCollection
+	"I will return the entities I I can reach with a certain name and a certain type.  I will check my children. Be careful, this is only for one level. I do not check my children recusively because this should be managed by the scope lookup. If you miss entities, you probably miss a scope.
+		
+	By default it is the entities I define, but this can depend on the language. Override me if it is the case."
+
+	"Ideally this method should be on TEntityMetaLevelDependency. But we want people to be able to override it to add specificities for their language, for example import management."
+
+	^ self definedEntitiesNamed: aString ofKinds: aCollection
+```
+
+In this method, we return the result of `definedEntitiesNamed:ofKinds:` because if your language has imports or inclusion of entities, maybe you'll need to override it in order to access the defined entities of the imported entity. In that case, this decomposition can be useful.
+
+Some example of customization will be provided in the next subsections about imports or aliases.
+
+I also provide a little helper: `MooseEntity>>#childOfType:named:`. This returns for an entity a direct child of the type and name provided. I added it here because I often used this in the development of importers and this can probably help you too.
+
+#### Import management
+
+Imports can work differently in each language, so it is not possible to offer one generic way to manage them. But here is an example of how imports can be managed for Python in the symbol resolution!
+
+In order to do this, we will override some methods in `FamixPythonEntity` to make them more specific.
+
+First, I'll need to distinguish entities that can have imports from those that cannot. I'll do it like this:
+
+```st
+FamixPythonEntity>>#canHaveImports
+
+	^ false
+```
+
+```st
+FamixTWithImports>>#canHaveImports
+
+	^ true
+```
+
+And now I can manage the imports and the aliases in the python lookup:
+
+```st
+FamixPythonEntity>>#reachableEntitiesNamed: aString ofKinds: aCollection
+
+	| entities |
+	entities := Set new.
+
+	self canHaveImports ifTrue: [
+			"If we can have imports, we should check if we can reach an entity of the right name and kind in those imports."
+			
+			self imports do: [ :import |
+					"It is possible for the imported entity to be nil in case it was not yet resolved. Imagine you reference something and later in the file there is an import. We resolve things in the order they appear, so the import might not yet be resolved. But in that case we can just ignore it because we cannot use something we did not import yet."
+					import importedEntity ifNotNil: [ :entity |
+							"In case the import has an alias matching, we add the imported entity, else we add the matching children of the imported entity."
+							import alias = aString
+								ifTrue: [ entities add: import importedEntity ]
+								ifFalse: [ entities addAll: (entity definedEntitiesNamed: aString ofKinds: aCollection) ] ] ] ].
+
+	entities addAll: (super reachableEntitiesNamed: aString ofKinds: aCollection).
+
+	^ entities
+```
+
+#### Aliases management 
+
+The management of aliases will depend on how the aliases are working in your language. Let's see it in this section. 
+
+In the Moose integration, we have methods looking for entities with a specific name. In the code directly present in the Symbol Resolver, the comparison of the name of the entities and the name provided by the user is done in `FamixTNamedEntity>>#matchesName:`. With this, it is possible to redefine it on some entities. For exemple:
+
+```st
+FamixEntityHoldingAliases>>matchesName: aString
+	self name = aString ifTrue: [ ^true ].
+
+	^ self aliases includes: aString
+
+```
+
+Like this, all aliases will be taken into consideration.
+
+Or if the entity does not hold the aliases itself but the alias is an association between the entity creating the alias and the entity been aliased:
+
+```st
+FamixEntityThatCanBeAliased>>matchesName: aString
+	self name = aString ifTrue: [ ^true ].
+
+	^ self aliases source aliasedName = aString
+
+```
+
+Those are just examples of how it can be done. The specifics will change for each languages.
 
 ## Error repport
 
@@ -519,50 +626,6 @@ API:
 
 > [!TIP]
 > While developping a parser it might be interesting to have an actual debugger instead of catching all the errors. It is possible to go in development mode via the world menu: `Debug > Toggle Symbol Resolver Debug mode`
-
-## Model integration
-
-The symbol resolver should be able to work with multiple kind of models even if it currently only includes a Moose integration.
-
-Let's see what is needed in order to irtegrate with a model.
-
-TODO
-
-### Moose integration
-
-TODO
-
-#### Import management
-
-TODO
-
-#### Aliases management 
-
-The management of aliases will depend on how the aliases are working in your language. Let's see it in this section. 
-
-In the Moose integration, we have methods looking for entities with a specific name. In the code directly present in the Symbol Resolver, the comparison of the name of the entities and the name provided by the user is done in `FamixTNamedEntity>>#matchesName:`. With this, it is possible to redefine it on some entities. For exemple:
-
-```st
-FamixEntityHoldingAliases>>matchesName: aString
-	self name = aString ifTrue: [ ^true ].
-
-	^ self aliases includes: aString
-
-```
-
-Like this, all aliases will be taken into consideration.
-
-Or if the entity does not hold the aliases itself:
-
-```st
-FamixEntityThatCanBeAliased>>matchesName: aString
-	self name = aString ifTrue: [ ^true ].
-
-	^ self aliases source aliasedName = aString
-
-```
-
-Those are just examples of how it can be done. The specifics will change for each languages.
 
 ## Advance cases
 
