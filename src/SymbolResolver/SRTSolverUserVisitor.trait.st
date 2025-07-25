@@ -70,12 +70,6 @@ SRTSolverUserVisitor >> resolve: identifiers foundAction: aBlock ifNone: another
 ]
 
 { #category : 'resolution' }
-SRTSolverUserVisitor >> resolveSilently: identifiers [
-
-	self errorReport catch: SRReferenceNotFound during: [ self resolve: identifiers ]
-]
-
-{ #category : 'resolution' }
 SRTSolverUserVisitor >> resolveUnresolvedSymbols [
 
 	^ self solver resolveUnresolvedSymbols
