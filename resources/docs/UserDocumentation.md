@@ -15,7 +15,6 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 			- [SRIdentifierResovable](#sridentifierresovable)
 			- [SRLocalClassEntityResolvable](#srlocalclassentityresolvable)
 		- [Add you own solver](#add-you-own-solver)
-	- [Make your model compatible with the Symbol Resolver](#make-your-model-compatible-with-the-symbol-resolver)
 	- [Error repport](#error-repport)
 	- [Model integration](#model-integration)
 		- [Moose integration](#moose-integration)
@@ -26,7 +25,6 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 		- [Reacheable entities as scope](#reacheable-entities-as-scope)
 		- [Tree Sitter Famix Integration](#tree-sitter-famix-integration)
 
-<!-- /TOC -->
 <!-- /TOC -->
 <!-- /TOC -->
 
@@ -403,30 +401,90 @@ Now the last step is to implement the resolution in itself by overriding `SRReso
 The actual resolution should be implemented in the method `MyResolvable>>#resolveInScope:currentEntity:`. This method takes the current scope and the current entity as a parameter. 
 The method will be called first in the top scope. In case the entity is not found, you should throw a `NotFound` error. In that case, the solver will catch this error and try in the next scope until there is no scope left to look into. If that's happening, then the replacement strategy will be triggered. 
 In some cases it is also possible that we know that an entity will not be found in any scope left to search. In that case, it is possible to raise a `SRNoResolutionPossible` error instead of a `NotFound`. This will stop the resolution right away and delegate the resolution to the replacement strategy. This is an optimization.
+Last thing to know is that we need to use the method `result:` to set a result we find during the resolution.
+
+In this case the implementation looks like this:
 
 ```st
 resolveInScope: aScope currentEntity: currentEntity
-	"We just need to check the methods of the class."
 
+	"We just need to check the methods of the class. If it's not a class, skip to the next scope"
 	aScope entity isClass ifFalse: [ NotFound signal ].
 
-	(aScope reachableEntitiesNamed: identifier ofKinds: self expectedKinds) ifNotEmpty: [ :entities | "I don't think we can have multiple results here."
-			self assert: entities size = 1.
-			^ self result: entities anyOne ].
+	(aScope reachableEntitiesNamed: identifier ofKinds: self expectedKinds) ifNotEmpty: [ :entities |
+		"I don't think we can have multiple results here."
+		self assert: entities size = 1.
+		^ self result: entities anyOne ]. "We save the result we found here"
 
+	"If I did not find anything in the first class I found, cut the resolution.
 	SRNoResolutionPossible signal
 ```
 
+Case 2: Resolution of imported entities in Python
 
-TODO - Add description on how to implement the Solver
+Imagine this code:
 
+```python
+	import moduleAtRoot
 
+	print(moduleAtRoot.moduleAtRootVariable)
+```
 
-## Make your model compatible with the Symbol Resolver
+We will implement a solver to find imported entities like this. 
 
-TODO
+We begin by creating the class:
 
-reachableEntities and co
+```st
+SRResolvable << #FamixPythonImportedEntityResolvable
+	slots: { #import . #identifier };
+	tag: 'SymbolResolution';
+	package: 'Famix-Python-Importer'
+```
+
+We generate the accessors for the two instance variables and then we can implement the resolution like this:
+
+```st
+resolveInScope: aScope currentEntity: currentEntity
+
+	"If the name is directly the imported entity, we save it as the result."
+	import importedEntity name = identifier ifTrue: [ ^ self result: import importedEntity ].
+
+	"else we check the entities inside the imported entity"
+	^ (import importedEntity definedEntitiesNamed: identifier ofKinds: self expectedKinds)
+		  ifEmpty: [ SRNoResolutionPossible signal ]
+		  ifNotEmpty: [ :entities | self result: entities anyOne ]
+```
+
+Now we can use this on like this:
+
+```st
+manageImportedInheritanceDeclaredBy: anAttributeNode
+
+	| inheritance importName className |
+	"We should never end up here because this means we have the sources of the imported entities but I'm still bulletproofing the parser in case we have some code that cannot run""If we did not find an import, we have a stub."
+	inheritance := self createInheritanceFrom: anAttributeNode.
+	importName := self visit: anAttributeNode _receiver.
+	className := self visit: anAttributeNode _value.
+
+	self findImportMatchingSource: importName ifFound: [ :import |
+			self
+				resolve: ((FamixPythonImportedEntityResolvable identifier: className import: import)
+						 expectedKind: FamixPythonClass;
+						 notFoundReplacementEntity: [ :unresolved :currentEntity |
+								 (self ensureStubClassNamed: unresolved identifier)
+									 typeContainer: (self ensureStubPackagesFromPath: unresolved import);
+									 yourself ];
+						 yourself)
+				foundAction: [ :entity :currentEntity | inheritance superclass: entity ].
+			^ inheritance ].
+
+	inheritance superclass: ((self ensureStubClassNamed: className)
+			 typeContainer: (self ensureStubPackagesFromPath: importName);
+			 yourself)
+```
+
+This concludes the documentation on resolvables implementation.
+
 
 ## Error repport
 
