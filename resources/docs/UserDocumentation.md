@@ -24,6 +24,7 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 	- [Error repport](#error-repport)
 	- [Advance cases](#advance-cases)
 		- [Concept of Main Entity](#concept-of-main-entity)
+		- [Use the result of a symbol resolution as a scope for another resolution](#use-the-result-of-a-symbol-resolution-as-a-scope-for-another-resolution)
 		- [Reacheable entities as scope](#reacheable-entities-as-scope)
 		- [Tree Sitter Famix Integration](#tree-sitter-famix-integration)
 
@@ -637,12 +638,71 @@ API:
 
 ### Concept of Main Entity
 
-TODO
+In some languages, scopes can be managed in a weird way that do not match the way most languages are doing. For example, in SQL it can happen that some scope are not resolved in order during the resolution. 
+
+I order to help with such cases, some concepts were added in the tooling such as the concept of "main entities".
+
+On top of defining an entity as the "current entity", you can also mark some as a "main entity" and get the first main entity from the stack.
+
+```st
+
+	self useMainEntity: aClass during: [
+		"some code"
+		self solver mainEntity addChild: anEntity ]
+
+```
+
+### Use the result of a symbol resolution as a scope for another resolution
+
+Another utility to help with some weird resolution cases is the ability to push a resolvable as a scope, and this scope will be based on the result of this resolution.
+
+In order to do this you can use:
+- `SRSymbolsSolver>>#pushResolvableAsScopeBeforeCurrentScope:foundAction:`
+- `SRSymbolsSolver>>#pushResolvableAsScopeBeforeMainEntityScope:foundAction:`
+
+So what will happen is that:
+- We register the resolvable with its found action
+- We push it in the scope before the current entity or before the main entity
+- We resolve this first resolvable
+- We resolve the next resolvables, and if we need to access this scope, we return the result we found during the previous step and the entity of the scope
 
 ### Reacheable entities as scope
 
-TODO
+Another utility provided is the ability to not add an entity in the scope, but directly give a collection of entities that can be reached.
+
+For example:
+
+```st
+visitClassDefinition: aNode
+	| class |
+	class := self ensureClass: aNode.
+	
+	self useCurrentEntity: class during: [
+		| attributes |
+		attributes := self getAttributes from: aNode attributes.
+		self pushEntitiesAsScope: attributes.
+		self visit: aNode methods
+	]
+```
+
+Then
+
+```st
+visitMethodDefinition: aNode
+	| method |
+	method := self ensureMethod: aNode.
+
+	(method name beginsWith: 'get_') ifTrue: [
+			self
+				resolve: ((SRIdentifierResolvable identifier: (method name withoutPrefix: 'get_'))
+						 expectedKind: FamixPythonAttribute;
+						 yourself)
+				foundAction: [ :entity :currentEntity | method beGetter ]
+				ifNone: [ "We do nothing" ] ].
+```
+
+Here the first scope the solver will go over is the collection of attributes we pushed as scope.
 
 ### Tree Sitter Famix Integration
 
-TODO
+This project is part of the Famix integration with TreeSitter to write importers faster. The documentation can be found there: [Documenation](https://github.com/moosetechnology/TreeSitterFamixIntegration/blob/main/resources/docs/UserDocumentation.md)
