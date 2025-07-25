@@ -139,26 +139,19 @@ SRSymbolsSolverTest >> testRemoveScope [
 
 { #category : 'tests' }
 SRSymbolsSolverTest >> testResolve [
-	| cyril guillaume isFoundActionTriggered |
+	| cyril fibao isFoundActionTriggered |
 	isFoundActionTriggered := false.
 	cyril := Mock named: #Cyril.
-	guillaume := Mock named: #Guillaume.
+	fibao := Mock named: #Fibao.
 	referencesSolver pushScope: (SREntityScope currentEntity: cyril).
 	referencesSolver
-		resolve: (SRIdentifierResolvable identifier: #guillaume)
+		resolve: (SRIdentifierResolvable identifier: #fibao)
 		foundAction: [ :foundEntity :currentEntity | 
-			self assert: foundEntity equals: guillaume.
+			self assert: foundEntity equals: fibao.
 			self assert: currentEntity equals: cyril.
 			isFoundActionTriggered := true ].
-	(cyril stub reachableEntitiesNamed: 'guillaume' ofKinds: {nil}) willReturn: {guillaume}.
-	guillaume stub name willReturn: 'guillaume'.
+	(cyril stub reachableEntitiesNamed: 'fibao' ofKinds: {nil}) willReturn: {fibao}.
+	fibao stub name willReturn: 'fibao'.
 	referencesSolver resolveUnresolvedSymbols.
 	self assert: isFoundActionTriggered
-]
-
-{ #category : 'tests' }
-SRSymbolsSolverTest >> testResolveInScope [
-	self flag: #todo. "Add test."
-	self skip.
-	self fail
 ]

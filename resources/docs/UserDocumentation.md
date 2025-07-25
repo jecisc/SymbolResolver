@@ -1,9 +1,11 @@
 # User Documentation of the Symbol Resolver
 
 A parsing helper to manage symbol resolution by handling scope resolution and finding the right entity from symbols in parsers
+
 <!-- TOC -->
 
 - [User Documentation of the Symbol Resolver](#user-documentation-of-the-symbol-resolver)
+	- [Getting started](#getting-started)
 	- [Getting strated with SymbolResolver](#getting-strated-with-symbolresolver)
 	- [Manage your scopes](#manage-your-scopes)
 		- [Understanding the importance of scopes](#understanding-the-importance-of-scopes)
@@ -26,7 +28,11 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 		- [Tree Sitter Famix Integration](#tree-sitter-famix-integration)
 
 <!-- /TOC -->
-<!-- /TOC -->
+
+## Getting started
+
+The main goal of the symbol resolver is to simplify the symbol resolution during the development of a parser/importer. 
+
 A classic architecture for the development of a parser to build a model is to:
 - Define a grammar and a paser for this grammar 
 - Generate a pseudo AST matching the grammar and produce it via the parser

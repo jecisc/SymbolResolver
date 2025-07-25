@@ -1,8 +1,11 @@
 # SymbolResolver
 A parsing helper to manage symbol resolution by handling scope resolution and finding the right entity from symbols in parsers
 
+<!-- TOC -->
+
 - [SymbolResolver](#symbolresolver)
   - [Installation](#installation)
+  - [Quick start](#quick-start)
   - [Documentation](#documentation)
   - [Version management](#version-management)
   - [Smalltalk versions compatibility](#smalltalk-versions-compatibility)
@@ -14,25 +17,68 @@ To install SymbolResolver on your Pharo image, execute the following script:
 
 ```Smalltalk
 Metacello new
-	githubUser: 'jecisc' project: 'SymbolResolver' commitish: 'main' path: 'src';
+	githubUser: 'jecisc' project: 'SymbolResolver' commitish: '1.x.x' path: 'src';
 	baseline: 'SymbolResolver';
 	load
 ```
 
-To add SymbolResolver to your baseline:
+To add TinyLogger to your baseline:
 
 ```Smalltalk
 spec
 	baseline: 'SymbolResolver'
-	with: [ spec repository: 'github://jecisc/SymbolResolver:main/src' ]
+	with: [ spec repository: 'github://jecisc/SymbolResolver:1.x.x/src' ]
 ```
 
-Note you can replace the #main by another branch such as #development or a tag such as #v1.0.0, #v1.? or #v1.2.? .
+Note you can replace the #master by another branch such as #development or a tag such as #1.0.0, #1.0.x.
+
+## Quick start
+
+To start to use the symbol resolver you'll need to use the trait `SRTSolverUserVisitor` in your importer. 
+
+Then you need to call #initializeSolver at the class initialization.
+
+You can not add entities on your scope stack using `#useCurrentEntity:during:` like this:
+
+```st
+visitClassDefinition: aClassDef
+
+	^ self
+            useCurrentEntity: (self ensureClass: aClassDef)
+            during: [
+                super visitClassDefinition: aClassDef.
+```
+
+This will help you build the context stack.
+
+Now that this is done you can start registering symbols to resolve. Here is a simple example:
+
+```st
+manageInheritanceDeclaredBy: superclassNode
+
+	| inheritance |
+	"The next line will create a FamixPythonInheritance with its source anchor and the subclass already set"
+	inheritance := self createInheritanceFrom: superclassNode.
+
+	self
+		resolve: ((SRIdentifierResolvable identifier: superclassNode sourceText) "This gives the name of the superclass"
+				 expectedKind: FamixPythonClass; "Here I difine that the entity I can find should be a class"
+				 notFoundReplacementEntity: [ :unresolvedSuperclass :currentEntity | self ensureStubClassNamed: unresolvedSuperclass identifier ]; "If I don't find the entity, I create a stub"
+				 yourself)
+		foundAction: [ :entity :currentEntity | inheritance superclass: entity ] "And now that I have the entity, stub or not, I can set the superclass in my association"
+```
+
+And when you finished to register everything to resolve, you can launch the resolution execution doing:
+
+```st
+  self resolveUnresolvedSymbols
+```
+
+For more details, check the full documentation provided next section.
 
 ## Documentation
 
-* [User documentation](resources/docs/UserDocumentation.md)
-* [Developer documentation](resources/docs/DeveloperDocumentation.md)
+You can find the full documentation here: [User documentation](resources/docs/UserDocumentation.md)
 
 ## Version management 
 
@@ -50,7 +96,7 @@ Thus, it should be safe to depend on a fixed major version and moving minor vers
 
 | Version 	| Compatible Pharo versions    |
 |-------------	|------------------------------|
-| 1.x.x       	| Pharo 70, 80, 90, 10, 11, 12, 13 |
+| 1.x.x       	| Pharo 70, 80, 90, 10, 11, 12, 13, 14 |
 
 ## Contact
 
