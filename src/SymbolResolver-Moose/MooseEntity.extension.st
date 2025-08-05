@@ -15,7 +15,7 @@ MooseEntity >> definedEntities [
 
 	"In this version we do not check the imports because we want to check imports only at 1 level"
 
-	^ self query descendants ofAnyType
+	^ self children
 ]
 
 { #category : '*SymbolResolver-Moose' }
