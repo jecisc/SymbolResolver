@@ -30,9 +30,10 @@ SRSymbolsSolver >> currentEntity [
 
 { #category : 'accessing' }
 SRSymbolsSolver >> currentEntityOfType: anEntityType [
+
 	^ (self scopes
-		detect: [:aScope | aScope hasCurrentEntity and: [aScope currentEntity class = anEntityType]]
-		ifNone: [ SRNoCurrentEntityOfSpecificTypeAvailable signalForType: anEntityType ReferencesResolver:  self ]) currentEntity
+		   detect: [ :aScope | aScope hasCurrentEntity and: [ aScope currentEntity isKindOf: anEntityType ] ]
+		   ifNone: [ SRNoCurrentEntityOfSpecificTypeAvailable signalForType: anEntityType ReferencesResolver: self ]) currentEntity
 ]
 
 { #category : 'accessing' }
