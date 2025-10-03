@@ -4,7 +4,7 @@ Extension { #name : 'MooseEntity' }
 MooseEntity >> childOfType: aType named: aString [
 	"This can be often useful in parser writtings in order to find if we already created some entities or not."
 
-	^ (self query descendants ofType: aType)
+	^ (self query containedEntities ofType: aType)
 		  detect: [ :child | child matchesName: aString ]
 		  ifNone: [ nil ]
 ]
@@ -15,7 +15,7 @@ MooseEntity >> definedEntities [
 
 	"In this version we do not check the imports because we want to check imports only at 1 level"
 
-	^ self children
+	^ self containedEntities
 ]
 
 { #category : '*SymbolResolver-Moose' }
