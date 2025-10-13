@@ -23,7 +23,7 @@ SRResolvableEntityScope class >> resolvable: aSRResolvable [
 SRResolvableEntityScope >> entity [
 
 	self assert: self resolvable result notNil description: 'We should always have resolved it before needing it'.
-	^ self resolvable entity
+	^ self resolvable result
 ]
 
 { #category : 'resolvable API' }

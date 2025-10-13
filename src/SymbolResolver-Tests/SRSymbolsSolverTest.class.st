@@ -88,12 +88,17 @@ SRSymbolsSolverTest >> testPushEntityAsScope [
 
 { #category : 'tests' }
 SRSymbolsSolverTest >> testPushEntityBlockAsScope [
+
 	| entity computer isFoundActionTriggered |
 	isFoundActionTriggered := false.
-	entity := Mock named: #Cyril.
-	computer := Mock named: #computer.
-	(entity stub reachableEntitiesNamed: #computer ofKinds: {nil}) willReturn: {computer}.
-	computer stub name willReturn: #computer.
+	entity := MockObject new.
+	computer := MockObject new.
+	entity
+		on: #reachableEntitiesNamed:ofKinds:
+		with: #computer
+		with: { nil }
+		respond: { computer }.
+	computer on: #name respond: #computer.
 	referencesSolver pushScope: (SREntityScope currentEntity: entity).
 	referencesSolver pushResolvableAsScopeBeforeCurrentScope: (SRIdentifierResolvable identifier: 'computer') foundAction: [ isFoundActionTriggered := true ].
 	self assert: referencesSolver scopes pop entity equals: entity.
@@ -139,19 +144,22 @@ SRSymbolsSolverTest >> testRemoveScope [
 
 { #category : 'tests' }
 SRSymbolsSolverTest >> testResolve [
+
 	| cyril fibao isFoundActionTriggered |
 	isFoundActionTriggered := false.
-	cyril := Mock named: #Cyril.
-	fibao := Mock named: #Fibao.
+	cyril := MockObject new.
+	fibao := MockObject new.
 	referencesSolver pushScope: (SREntityScope currentEntity: cyril).
-	referencesSolver
-		resolve: (SRIdentifierResolvable identifier: #fibao)
-		foundAction: [ :foundEntity :currentEntity | 
+	referencesSolver resolve: (SRIdentifierResolvable identifier: #fibao) foundAction: [ :foundEntity :currentEntity |
 			self assert: foundEntity equals: fibao.
 			self assert: currentEntity equals: cyril.
 			isFoundActionTriggered := true ].
-	(cyril stub reachableEntitiesNamed: 'fibao' ofKinds: {nil}) willReturn: {fibao}.
-	fibao stub name willReturn: 'fibao'.
+	cyril
+		on: #reachableEntitiesNamed:ofKinds:
+		with: 'fibao'
+		with: { nil }
+		respond: { fibao }.
+	fibao on: #name respond: 'fibao'.
 	referencesSolver resolveUnresolvedSymbols.
 	self assert: isFoundActionTriggered
 ]
