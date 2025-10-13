@@ -92,6 +92,7 @@ SRSymbolsSolverTest >> testPushEntityBlockAsScope [
 	| entity computer isFoundActionTriggered |
 	isFoundActionTriggered := false.
 	"MockObject is not in old versions of Pharo so we skip the tests for now."
+	SystemVersion current major < 9 ifTrue: [ self skip ].
 	entity := MockObject new.
 	computer := MockObject new.
 	entity
