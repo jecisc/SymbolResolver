@@ -16,6 +16,7 @@ A parsing helper to manage symbol resolution by handling scope resolution and fi
 		- [Existing solvers](#existing-solvers)
 			- [SRIdentifierResovable](#sridentifierresovable)
 			- [SRLocalClassEntityResolvable](#srlocalclassentityresolvable)
+			- [SRMethodInvocationResolvable](#srmethodinvocationresolvable)
 		- [Add you own solver](#add-you-own-solver)
 	- [Model integration](#model-integration)
 		- [Moose integration](#moose-integration)
@@ -337,6 +338,25 @@ You can also create a stub entity in case the method comes from a stub superclas
 				notFoundReplacementEntity: [ :unresolved | self ensureStubMethodNamed: unresolved identifier ];
 				yourself)
 		foundAction: [ :method :currentEntity | self createInvocationOf: method from: currentEntity node: aCallNode ]
+```
+
+#### SRMethodInvocationResolvable
+
+The goal of this solver is to resolve methods invocations. 
+
+For example we want to resolve `x.y()` in Python when we know that `x` is not an imported entity.
+
+It can be used like this:
+
+```st
+	"=> c.x()"
+	"In this case we need to visit the object to find for example accesses. We know there is something interesting since we escaped all other cases above."
+	self visit: aNode _object.
+	^ self
+		  resolve: ((SRMethodInvocationResolvable identifier: identifier)
+				   notFoundReplacementEntity: [ :unresolved :currentEntity | self ensureStubMethodNamed: unresolved identifier ];
+				   yourself)
+		  foundAction: [ :result :currentEntity | self createInvocationOf: result from: currentEntity node: (aNode parentOfType: #call) ]
 ```
 
 In the future, we might add other generic resolvable.

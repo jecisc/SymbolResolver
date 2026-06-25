@@ -31,8 +31,9 @@ Class {
 	#instVars : [
 		'identifier'
 	],
-	#category : 'SymbolResolver',
-	#package : 'SymbolResolver'
+	#category : 'SymbolResolver-Core',
+	#package : 'SymbolResolver',
+	#tag : 'Core'
 }
 
 { #category : 'instance creation' }
